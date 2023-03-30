@@ -38,6 +38,7 @@
 
         <activity
             android:name=".app.main.MainActivity"
+            android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -51,48 +52,80 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
+            android:exported="true"
             android:name=".app.records.RecordsActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.settings.SettingsActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.info.ActivityInformation"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.lostrecords.LostRecordsActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.browser.FileBrowserActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.trash.TrashActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="false"
             android:name=".app.welcome.WelcomeActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="false"
             android:name=".app.setup.SetupActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.moverecords.MoveRecordsActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:exported="true"
             android:name=".app.TransparentRecordingActivity"
             android:theme="@style/Theme.Transparent" />
 
-        <service android:name=".app.RecordingService" />
-        <service android:name=".app.PlaybackService" />
-        <service android:name=".app.DownloadService" />
-        <service android:name=".app.DecodeService" />
-        <service android:name=".app.moverecords.MoveRecordsService" />
+        <service
+            android:exported="false"
+            android:name=".app.RecordingService" />
+        <service
+            android:exported="false"
+            android:name=".app.PlaybackService" />
+        <service
+            android:exported="false"
+            android:name=".app.DownloadService" />
+        <service
+            android:exported="false"
+            android:name=".app.DecodeService" />
+        <service
+            android:exported="false"
+            android:name=".app.moverecords.MoveRecordsService" />
 
-        <receiver android:name=".WidgetReceiver" />
-        <receiver android:name=".app.RecordingService$StopRecordingReceiver" />
-        <receiver android:name=".app.PlaybackService$StopPlaybackReceiver" />
-        <receiver android:name=".app.DownloadService$StopDownloadReceiver" />
-        <receiver android:name=".app.DecodeService$StopDecodeReceiver" />
-        <receiver android:name=".app.moverecords.MoveRecordsService$StopMoveRecordsReceiver" />
+        <receiver
+            android:exported="false"
+            android:name=".WidgetReceiver" />
+        <receiver
+            android:exported="false"
+            android:name=".app.RecordingService$StopRecordingReceiver" />
+        <receiver
+            android:exported="false"
+            android:name=".app.PlaybackService$StopPlaybackReceiver" />
+        <receiver
+            android:exported="false"
+            android:name=".app.DownloadService$StopDownloadReceiver" />
+        <receiver
+            android:exported="false"
+            android:name=".app.DecodeService$StopDecodeReceiver" />
+        <receiver
+            android:exported="false"
+            android:name=".app.moverecords.MoveRecordsService$StopMoveRecordsReceiver" />
 
         <provider
             android:name=".AppFileProvider"

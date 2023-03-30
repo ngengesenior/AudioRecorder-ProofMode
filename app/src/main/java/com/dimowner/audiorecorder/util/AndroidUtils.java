@@ -33,6 +33,15 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.net.Uri;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -63,6 +72,8 @@ import com.dimowner.audiorecorder.R;
 import com.dimowner.audiorecorder.app.lostrecords.LostRecordsActivity;
 import com.dimowner.audiorecorder.app.lostrecords.RecordItem;
 import com.dimowner.audiorecorder.data.database.Record;
+import com.proofmode.proofmodelib.utils.ProofModeUtils;
+import com.proofmode.proofmodelib.worker.GenerateProofWorker;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,6 +99,19 @@ public class AndroidUtils {
 	 */
 	public static float dpToPx(int dp) {
 		return dpToPx((float) dp);
+	}
+
+	public static LiveData<List<WorkInfo>> generateProofWithWorkManager(Context context, File file) {
+		Uri uri = ProofModeUtils.INSTANCE.getUriForFile(file, context, context.getPackageName());
+		Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uri.toString());
+		OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(GenerateProofWorker.class)
+				.setInputData(data)
+				.setConstraints(new Constraints.Builder()
+						.setRequiresStorageNotLow(true).build())
+				.build();
+		WorkManager workManager = WorkManager.getInstance(context);
+		workManager.enqueueUniqueWork(uri.toString(), ExistingWorkPolicy.REPLACE,workRequest);
+		return workManager.getWorkInfosForUniqueWorkLiveData(uri.toString());
 	}
 
 	/**

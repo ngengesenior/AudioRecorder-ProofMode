@@ -92,6 +92,7 @@ public class ARApplication extends Application {
 			prefs.migrateSettings();
 		}
 
+
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(AUDIO_BECOMING_NOISY);
 		audioOutputChangeReceiver = new AudioOutputChangeReceiver();
