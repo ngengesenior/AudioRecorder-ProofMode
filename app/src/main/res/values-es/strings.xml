@@ -177,5 +177,7 @@
     	<b>Audio Recorder 2021</b><br>
 		Version %s
 	]]></string>
+    <string name="mandatory_recorder_permission_message">Permita que la grabadora de audio acceda a su micrófono y almacenamiento. El micrófono es necesario para capturar la voz durante la grabación, mientras que el permiso de almacenamiento es necesario para guardar una grabación.</string>
+	<string name="turn_on">Activar</string>
 	<!--<a href="http://#/">Application site</a>-->
 </resources>

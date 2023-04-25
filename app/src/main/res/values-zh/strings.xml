@@ -285,4 +285,6 @@
     </string-array>
 
     <string name="app_widget_description">Start recording widget</string>
+    <string name="mandatory_recorder_permission_message">允许音频录音应用访问您的麦克风和存储空间。在录音过程中，需要使用麦克风来捕捉声音，而存储权限则用于保存录音文件。</string>
+    <string name="turn_on"> 打开 (dǎ kāi)</string>
 </resources>

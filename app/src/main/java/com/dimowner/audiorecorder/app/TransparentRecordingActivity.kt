@@ -23,6 +23,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.dimowner.audiorecorder.ARApplication
 import com.dimowner.audiorecorder.R
 import com.dimowner.audiorecorder.data.FileRepository
@@ -34,7 +36,7 @@ import com.dimowner.audiorecorder.util.AndroidUtils
 const val REQ_CODE_RECORD_AUDIO = 303
 const val REQ_CODE_WRITE_EXTERNAL_STORAGE = 404
 
-class TransparentRecordingActivity : Activity() {
+class TransparentRecordingActivity : AppCompatActivity() {
 
     private lateinit var prefs: Prefs
     private lateinit var fileRepository: FileRepository
@@ -131,5 +133,15 @@ class TransparentRecordingActivity : Activity() {
             }
         }
         return true
+    }
+
+    companion object {
+        private val mandatoryPermissions = arrayOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        private val optionalPermissions = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
     }
 }

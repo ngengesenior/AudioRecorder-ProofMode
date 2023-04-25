@@ -16,6 +16,7 @@
 
 package com.dimowner.audiorecorder.app;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -24,11 +25,15 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
+
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+
 import android.widget.RemoteViews;
 
 import com.dimowner.audiorecorder.ARApplication;
@@ -37,11 +42,13 @@ import com.dimowner.audiorecorder.R;
 import com.dimowner.audiorecorder.app.main.MainActivity;
 import com.dimowner.audiorecorder.audio.player.PlayerContractNew;
 import com.dimowner.audiorecorder.exception.AppException;
+import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.TimeUtils;
 
 import org.jetbrains.annotations.NotNull;
 
 import androidx.core.app.NotificationManagerCompat;
+
 import timber.log.Timber;
 
 public class PlaybackService extends Service {
@@ -61,7 +68,7 @@ public class PlaybackService extends Service {
 	private NotificationManagerCompat notificationManager;
 	private PendingIntent contentPendingIntent;
 	private RemoteViews remoteViewsSmall;
-//	private RemoteViews remoteViewsBig;
+	//	private RemoteViews remoteViewsBig;
 	private String recordName = "";
 	private boolean started = false;
 
@@ -93,18 +100,31 @@ public class PlaybackService extends Service {
 
 		if (playerCallback == null) {
 			playerCallback = new PlayerContractNew.PlayerCallback() {
-				@Override public void onError(@NotNull AppException throwable) {
+				@Override
+				public void onError(@NotNull AppException throwable) {
 					stopForegroundService();
 				}
-				@Override public void onStopPlay() {
+
+				@Override
+				public void onStopPlay() {
 					stopForegroundService();
 				}
-				@Override public void onSeek(long mills) { }
-				@Override public void onPausePlay() {
+
+				@Override
+				public void onSeek(long mills) {
+				}
+
+				@Override
+				public void onPausePlay() {
 					onPausePlayback();
 				}
-				@Override public void onPlayProgress(long mills) { }
-				@Override public void onStartPlay() {
+
+				@Override
+				public void onPlayProgress(long mills) {
+				}
+
+				@Override
+				public void onStartPlay() {
 					onStartPlayback();
 				}
 			};
@@ -164,7 +184,12 @@ public class PlaybackService extends Service {
 		// Create notification default intent.
 		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-		contentPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+		// add flag else all will crash on API 31+
+		int pendingIntentFlag = 0;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			pendingIntentFlag = PendingIntent.FLAG_IMMUTABLE;
+		}
+		contentPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, pendingIntentFlag);
 		startForeground(NOTIF_ID, buildNotification());
 		started = true;
 	}
@@ -202,7 +227,7 @@ public class PlaybackService extends Service {
 	protected PendingIntent getPendingSelfIntent(Context context, String action) {
 		Intent intent = new Intent(context, StopPlaybackReceiver.class);
 		intent.setAction(action);
-		return PendingIntent.getBroadcast(context, 10, intent, 0);
+		return PendingIntent.getBroadcast(context, 10, intent, AndroidUtils.getIntentFlag());
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)
@@ -212,7 +237,7 @@ public class PlaybackService extends Service {
 			NotificationChannel chan = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
 			chan.setLightColor(Color.BLUE);
 			chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-			chan.setSound(null,null);
+			chan.setSound(null, null);
 			chan.enableLights(false);
 			chan.enableVibration(false);
 
@@ -230,6 +255,16 @@ public class PlaybackService extends Service {
 //		remoteViewsBig.setTextViewText(R.id.txt_playback_progress,
 //				getResources().getString(R.string.playback, TimeUtils.formatTimeIntervalHourMinSec2(mills)));
 
+			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				// TODO: Consider calling
+				//    ActivityCompat#requestPermissions
+				// here to request the missing permissions, and then overriding
+				//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+				//                                          int[] grantResults)
+				// to handle the case where the user grants the permission. See the documentation
+				// for ActivityCompat#requestPermissions for more details.
+				return;
+			}
 			notificationManager.notify(NOTIF_ID, buildNotification());
 		}
 	}
@@ -238,6 +273,16 @@ public class PlaybackService extends Service {
 		if (started && remoteViewsSmall != null) {
 //			remoteViewsBig.setImageViewResource(R.id.btn_pause, R.drawable.ic_play);
 			remoteViewsSmall.setImageViewResource(R.id.btn_pause, R.drawable.ic_play);
+			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				// TODO: Consider calling
+				//    ActivityCompat#requestPermissions
+				// here to request the missing permissions, and then overriding
+				//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+				//                                          int[] grantResults)
+				// to handle the case where the user grants the permission. See the documentation
+				// for ActivityCompat#requestPermissions for more details.
+				return;
+			}
 			notificationManager.notify(NOTIF_ID, buildNotification());
 		}
 	}
@@ -246,6 +291,9 @@ public class PlaybackService extends Service {
 		if (started && remoteViewsSmall != null) {
 //			remoteViewsBig.setImageViewResource(R.id.btn_pause, R.drawable.ic_pause);
 			remoteViewsSmall.setImageViewResource(R.id.btn_pause, R.drawable.ic_pause);
+			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				return;
+			}
 			notificationManager.notify(NOTIF_ID, buildNotification());
 		}
 	}

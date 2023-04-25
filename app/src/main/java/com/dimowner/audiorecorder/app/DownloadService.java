@@ -37,6 +37,7 @@ import com.dimowner.audiorecorder.BackgroundQueue;
 import com.dimowner.audiorecorder.ColorMap;
 import com.dimowner.audiorecorder.R;
 import com.dimowner.audiorecorder.app.main.MainActivity;
+import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.DownloadManagerKt;
 import com.dimowner.audiorecorder.util.OnCopyListListener;
 import org.jetbrains.annotations.NotNull;
@@ -205,7 +206,7 @@ public class DownloadService extends Service {
 		// Create notification default intent.
 		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-		contentPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+		contentPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, AndroidUtils.getIntentFlag());
 		startForeground(NOTIF_ID, buildNotification());
 	}
 
@@ -239,7 +240,7 @@ public class DownloadService extends Service {
 	protected PendingIntent getPendingSelfIntent(Context context, String action) {
 		Intent intent = new Intent(context, StopDownloadReceiver.class);
 		intent.setAction(action);
-		return PendingIntent.getBroadcast(context, 10, intent, 0);
+		return PendingIntent.getBroadcast(context, 10, intent, AndroidUtils.getIntentFlag());
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.widget.RemoteViews
 import com.dimowner.audiorecorder.app.TransparentRecordingActivity
+import com.dimowner.audiorecorder.util.AndroidUtils
 
 class RecordingWidget : AppWidgetProvider() {
 	override fun onUpdate(
@@ -45,7 +46,7 @@ internal fun updateAppWidget(
 
 private fun getRecordingPendingIntent(context: Context): PendingIntent {
 	val intent = Intent(context, WidgetReceiver::class.java)
-	return PendingIntent.getBroadcast(context, 11, intent, 0)
+	return PendingIntent.getBroadcast(context, 11, intent, AndroidUtils.getIntentFlag())
 }
 
 class WidgetReceiver : BroadcastReceiver() {

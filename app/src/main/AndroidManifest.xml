@@ -2,19 +2,36 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dimowner.audiorecorder">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
-    <uses-feature android:name="android.hardware.telephony" android:required="false" />
-    <uses-feature android:name="android.hardware.location" android:required="false" />
-    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
-    <uses-feature android:name="android.hardware.camera2" android:required="false" />
-    <uses-feature android:name="android.hardware.microphone" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="true" />
 
     <application
         android:name=".ARApplication"
@@ -24,6 +41,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/audio_recorder_logo"
         android:theme="@style/AppTheme">
+        <activity
+            android:theme="@style/PermissionTheme"
+            android:screenOrientation="portrait"
+            android:name=".app.permissions.PermissionsActivity"
+            android:exported="true" />
+
         <receiver
             android:name=".RecordingWidget"
             android:exported="true">
@@ -52,80 +75,80 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:exported="true"
             android:name=".app.records.RecordsActivity"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.settings.SettingsActivity"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.info.ActivityInformation"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.lostrecords.LostRecordsActivity"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.browser.FileBrowserActivity"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.trash.TrashActivity"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="false"
             android:name=".app.welcome.WelcomeActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".app.setup.SetupActivity"
+            android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.moverecords.MoveRecordsActivity"
+            android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:exported="true"
             android:name=".app.TransparentRecordingActivity"
+            android:exported="true"
             android:theme="@style/Theme.Transparent" />
 
         <service
-            android:exported="false"
-            android:name=".app.RecordingService" />
+            android:name=".app.RecordingService"
+            android:exported="false" />
         <service
-            android:exported="false"
-            android:name=".app.PlaybackService" />
+            android:name=".app.PlaybackService"
+            android:exported="false" />
         <service
-            android:exported="false"
-            android:name=".app.DownloadService" />
+            android:name=".app.DownloadService"
+            android:exported="false" />
         <service
-            android:exported="false"
-            android:name=".app.DecodeService" />
+            android:name=".app.DecodeService"
+            android:exported="false" />
         <service
-            android:exported="false"
-            android:name=".app.moverecords.MoveRecordsService" />
+            android:name=".app.moverecords.MoveRecordsService"
+            android:exported="false" />
 
         <receiver
-            android:exported="false"
-            android:name=".WidgetReceiver" />
+            android:name=".WidgetReceiver"
+            android:exported="false" />
         <receiver
-            android:exported="false"
-            android:name=".app.RecordingService$StopRecordingReceiver" />
+            android:name=".app.RecordingService$StopRecordingReceiver"
+            android:exported="false" />
         <receiver
-            android:exported="false"
-            android:name=".app.PlaybackService$StopPlaybackReceiver" />
+            android:name=".app.PlaybackService$StopPlaybackReceiver"
+            android:exported="false" />
         <receiver
-            android:exported="false"
-            android:name=".app.DownloadService$StopDownloadReceiver" />
+            android:name=".app.DownloadService$StopDownloadReceiver"
+            android:exported="false" />
         <receiver
-            android:exported="false"
-            android:name=".app.DecodeService$StopDecodeReceiver" />
+            android:name=".app.DecodeService$StopDecodeReceiver"
+            android:exported="false" />
         <receiver
-            android:exported="false"
-            android:name=".app.moverecords.MoveRecordsService$StopMoveRecordsReceiver" />
+            android:name=".app.moverecords.MoveRecordsService$StopMoveRecordsReceiver"
+            android:exported="false" />
 
         <provider
             android:name=".AppFileProvider"
