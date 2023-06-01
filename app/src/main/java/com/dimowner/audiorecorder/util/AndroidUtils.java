@@ -16,10 +16,13 @@
 
 package com.dimowner.audiorecorder.util;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -32,7 +35,20 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.net.Uri;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import android.os.Build;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -63,6 +79,8 @@ import com.dimowner.audiorecorder.R;
 import com.dimowner.audiorecorder.app.lostrecords.LostRecordsActivity;
 import com.dimowner.audiorecorder.app.lostrecords.RecordItem;
 import com.dimowner.audiorecorder.data.database.Record;
+import com.proofmode.proofmodelib.utils.ProofModeUtils;
+import com.proofmode.proofmodelib.worker.GenerateProofWorker;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,6 +106,19 @@ public class AndroidUtils {
 	 */
 	public static float dpToPx(int dp) {
 		return dpToPx((float) dp);
+	}
+
+	public static LiveData<List<WorkInfo>> generateProofWithWorkManager(Context context, File file) {
+		Uri uri = ProofModeUtils.INSTANCE.getUriForFile(file, context, context.getPackageName());
+		Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uri.toString());
+		OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(GenerateProofWorker.class)
+				.setInputData(data)
+				.setConstraints(new Constraints.Builder()
+						.setRequiresStorageNotLow(true).build())
+				.build();
+		WorkManager workManager = WorkManager.getInstance(context);
+		workManager.enqueueUniqueWork(uri.toString(), ExistingWorkPolicy.REPLACE,workRequest);
+		return workManager.getWorkInfosForUniqueWorkLiveData(uri.toString());
 	}
 
 	/**
@@ -624,5 +655,42 @@ public class AndroidUtils {
 
 	public interface OnSetNameClickListener {
 		void onClick(String name);
+	}
+
+
+
+	public static int getIntentFlag(){
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			return PendingIntent.FLAG_IMMUTABLE;
+		}
+		return 0;
+	}
+	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+	public static void requestPermissionToPostNotification(Activity activity){
+		final int REQ_CODE_POST_NOTIFICATIONS = 111;
+		if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+			// ignore and continue
+
+		} else if (activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+			androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(activity);
+			builder.setMessage("To play audio recordings and see progress, you need to grant notifications permission.Do you want to grant it?")
+					.setTitle("Grant notifications permission.")
+					.setPositiveButton(activity.getString(android.R.string.yes), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialogInterface, int i) {
+							activity.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},REQ_CODE_POST_NOTIFICATIONS);
+							dialogInterface.dismiss();
+						}
+					}).setNegativeButton(activity.getString(android.R.string.no), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialogInterface, int i) {
+							dialogInterface.dismiss();
+						}
+					});
+		} else {
+			activity.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},REQ_CODE_POST_NOTIFICATIONS);
+
+		}
+
 	}
 }

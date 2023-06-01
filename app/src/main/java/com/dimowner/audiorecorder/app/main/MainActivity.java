@@ -40,6 +40,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.dimowner.audiorecorder.ARApplication;
 import com.dimowner.audiorecorder.ColorMap;
 import com.dimowner.audiorecorder.IntArrayList;
@@ -52,6 +54,7 @@ import com.dimowner.audiorecorder.app.RecordingService;
 import com.dimowner.audiorecorder.app.info.ActivityInformation;
 import com.dimowner.audiorecorder.app.info.RecordInfo;
 import com.dimowner.audiorecorder.app.moverecords.MoveRecordsActivity;
+import com.dimowner.audiorecorder.app.permissions.PermissionsActivity;
 import com.dimowner.audiorecorder.app.records.RecordsActivity;
 import com.dimowner.audiorecorder.app.settings.SettingsActivity;
 import com.dimowner.audiorecorder.app.welcome.WelcomeActivity;
@@ -70,7 +73,6 @@ import com.dimowner.audiorecorder.util.TimeUtils;
 import java.io.File;
 import java.util.List;
 
-import androidx.annotation.NonNull;
 import timber.log.Timber;
 
 public class MainActivity extends Activity implements MainContract.View, View.OnClickListener {
@@ -88,6 +90,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 	public static final int REQ_CODE_READ_EXTERNAL_STORAGE_PLAYBACK = 406;
 	public static final int REQ_CODE_READ_EXTERNAL_STORAGE_DOWNLOAD = 407;
 	public static final int REQ_CODE_IMPORT_AUDIO = 11;
+	public static final int REQ_CODE_POST_NOTIFICATIONS = 111;
 
 	private WaveformViewNew waveformView;
 	private RecordingWaveformView recordingWaveformView;
@@ -158,7 +161,11 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 		colorMap = ARApplication.getInjector().provideColorMap();
 		setTheme(colorMap.getAppThemeResource());
 		super.onCreate(savedInstanceState);
+		startActivity(new Intent(this, PermissionsActivity.class));
 		setContentView(R.layout.activity_main);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			AndroidUtils.requestPermissionToPostNotification(this);
+		}
 
 		waveformView = findViewById(R.id.record);
 		recordingWaveformView = findViewById(R.id.recording_view);
@@ -363,6 +370,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 			showError(R.string.cant_import_files);
 		}
 	}
+
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

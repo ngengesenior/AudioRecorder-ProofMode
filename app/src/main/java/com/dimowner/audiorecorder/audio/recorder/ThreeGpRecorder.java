@@ -16,12 +16,14 @@
 
 package com.dimowner.audiorecorder.audio.recorder;
 
+import android.content.Context;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 
 import com.dimowner.audiorecorder.exception.InvalidOutputFile;
 import com.dimowner.audiorecorder.exception.RecorderInitException;
+import com.dimowner.audiorecorder.util.AndroidUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +35,7 @@ import static com.dimowner.audiorecorder.AppConstants.RECORDING_VISUALIZATION_IN
 
 public class ThreeGpRecorder implements RecorderContract.Recorder {
 
+	private final Context context;
 	private MediaRecorder recorder = null;
 	private File recordFile = null;
 	private long updateTime = 0;
@@ -44,19 +47,25 @@ public class ThreeGpRecorder implements RecorderContract.Recorder {
 
 	private RecorderContract.RecorderCallback recorderCallback;
 
-	private static class RecorderSingletonHolder {
+	/*private static class RecorderSingletonHolder {
 		private static final ThreeGpRecorder singleton = new ThreeGpRecorder();
 
 		public static ThreeGpRecorder getSingleton() {
 			return RecorderSingletonHolder.singleton;
 		}
-	}
+	}*/
 
-	public static ThreeGpRecorder getInstance() {
+	/*public static ThreeGpRecorder getInstance() {
 		return RecorderSingletonHolder.getSingleton();
+	}*/
+
+	/*private ThreeGpRecorder() { }*/
+
+	public ThreeGpRecorder(Context context) {
+		this.context = context;
 	}
 
-	private ThreeGpRecorder() { }
+
 
 	@Override
 	public void setRecorderCallback(RecorderContract.RecorderCallback callback) {
@@ -160,6 +169,7 @@ public class ThreeGpRecorder implements RecorderContract.Recorder {
 			if (recorderCallback != null) {
 				recorderCallback.onStopRecord(recordFile);
 			}
+			AndroidUtils.generateProofWithWorkManager(context,recordFile);
 			durationMills = 0;
 			recordFile = null;
 			isRecording.set(false);

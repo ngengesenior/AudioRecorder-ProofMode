@@ -299,4 +299,6 @@
 	</string-array>
 
 	<string name="app_widget_description">Почати запис віджет</string>
+    <string name="mandatory_recorder_permission_message">Дозвольте додатку "Аудіо записувач" отримати доступ до вашого мікрофона та сховища. Мікрофон необхідний для запису голосу під час запису, а дозвіл на сховище потрібен для збереження запису.</string>
+	<string name="turn_on">Увімкнути</string>
 </resources>

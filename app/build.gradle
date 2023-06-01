@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 //apply plugin: 'com.google.firebase.crashlytics'
 //apply plugin: 'com.google.gms.google-services'
@@ -10,12 +9,12 @@ def versionMinor = 9
 def versionPatch = 33
 
 android {
-	compileSdkVersion 30
+	compileSdkVersion 33
 	buildToolsVersion "30.0.3"
 	defaultConfig {
 		applicationId "com.dimowner.audiorecorder"
 		minSdkVersion 21
-		targetSdkVersion 30
+		targetSdkVersion 33
 //		versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
 //		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 		versionCode 933
@@ -97,7 +96,8 @@ android.variantFilter { variant ->
 }
 
 dependencies {
-	def androidX = "1.2.1"
+	implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+	def androidX = "1.3.0"
 	def coroutines = "1.4.1"
 	def timber = "4.7.1"
 
@@ -111,6 +111,16 @@ dependencies {
 	implementation "androidx.recyclerview:recyclerview:$androidX"
 
 	implementation "androidx.viewpager2:viewpager2:1.0.0"
+	def work_version = '2.8.1'
+	implementation "androidx.work:work-runtime-ktx:$work_version"
+	implementation project(":proofmodeLib")
+	implementation 'androidx.appcompat:appcompat:1.4.1'
+	implementation 'com.google.android.material:material:1.6.0'
+	implementation "com.google.guava:guava:31.0.1-android"
+
+	// To use CallbackToFutureAdapter
+	implementation "androidx.concurrent:concurrent-futures:1.1.0"
+
 
 //	// Import the BoM for the Firebase platform
 //	implementation platform('com.google.firebase:firebase-bom:26.1.0')

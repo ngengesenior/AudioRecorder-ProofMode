@@ -1,5 +1,6 @@
 package com.dimowner.audiorecorder.app.moverecords
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,6 +8,7 @@ import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Binder
 import android.os.Build
@@ -14,6 +16,7 @@ import android.os.IBinder
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.dimowner.audiorecorder.ARApplication
@@ -24,6 +27,7 @@ import com.dimowner.audiorecorder.app.main.MainActivity
 import com.dimowner.audiorecorder.data.FileRepository
 import com.dimowner.audiorecorder.data.Prefs
 import com.dimowner.audiorecorder.data.database.LocalRepository
+import com.dimowner.audiorecorder.util.AndroidUtils
 import com.dimowner.audiorecorder.util.OnCopyListener
 import com.dimowner.audiorecorder.util.copyFileToDir
 import timber.log.Timber
@@ -230,7 +234,7 @@ class MoveRecordsService : Service() {
 		// Create notification default intent.
 		val intent = Intent(applicationContext, MainActivity::class.java)
 		intent.flags = Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP
-		val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
+		val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, AndroidUtils.getIntentFlag())
 
 		// Create notification builder.
 		builder = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -260,7 +264,7 @@ class MoveRecordsService : Service() {
 	private fun getCancelMovePendingIntent(context: Context): PendingIntent {
 		val intent = Intent(context, StopMoveRecordsReceiver::class.java)
 		intent.action = ACTION_CANCEL_MOVE_RECORDS
-		return PendingIntent.getBroadcast(context, 318, intent, 0)
+		return PendingIntent.getBroadcast(context, 318, intent, AndroidUtils.getIntentFlag())
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)
@@ -282,6 +286,20 @@ class MoveRecordsService : Service() {
 
 	private fun updateNotification(percent: Int) {
 		remoteViewsSmall.setProgressBar(R.id.progress, 100, percent, false)
+		if (ActivityCompat.checkSelfPermission(
+				this,
+				Manifest.permission.POST_NOTIFICATIONS
+			) != PackageManager.PERMISSION_GRANTED
+		) {
+			// TODO: Consider calling
+			//    ActivityCompat#requestPermissions
+			// here to request the missing permissions, and then overriding
+			//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+			//                                          int[] grantResults)
+			// to handle the case where the user grants the permission. See the documentation
+			// for ActivityCompat#requestPermissions for more details.
+			return
+		}
 		notificationManager.notify(NOTIF_ID, builder.build())
 	}
 
@@ -291,6 +309,20 @@ class MoveRecordsService : Service() {
 			R.id.txt_name,
 			resources.getString(R.string.moving_record, text)
 		)
+		if (ActivityCompat.checkSelfPermission(
+				this,
+				Manifest.permission.POST_NOTIFICATIONS
+			) != PackageManager.PERMISSION_GRANTED
+		) {
+			// TODO: Consider calling
+			//    ActivityCompat#requestPermissions
+			// here to request the missing permissions, and then overriding
+			//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+			//                                          int[] grantResults)
+			// to handle the case where the user grants the permission. See the documentation
+			// for ActivityCompat#requestPermissions for more details.
+			return
+		}
 		notificationManager.notify(NOTIF_ID, builder.build())
 	}
 

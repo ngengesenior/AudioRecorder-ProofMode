@@ -165,11 +165,11 @@ public class Injector {
 		switch (providePrefs().getSettingRecordingFormat()) {
 			default:
 			case AppConstants.FORMAT_M4A:
-				return AudioRecorder.getInstance();
+				return new AudioRecorder(this.context);
 			case AppConstants.FORMAT_WAV:
-				return WavRecorder.getInstance();
+				return new WavRecorder(context);
 			case AppConstants.FORMAT_3GP:
-				return ThreeGpRecorder.getInstance();
+				return new ThreeGpRecorder(context);
 		}
 	}
 

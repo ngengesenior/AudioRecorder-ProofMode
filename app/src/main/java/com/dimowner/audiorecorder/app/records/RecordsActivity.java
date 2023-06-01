@@ -112,6 +112,9 @@ public class RecordsActivity extends Activity implements RecordsContract.View, V
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		colorMap = ARApplication.getInjector().provideColorMap();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			AndroidUtils.requestPermissionToPostNotification(this);
+		}
 		SimpleWaveformView.setWaveformColorRes(colorMap.getPrimaryColorRes());
 		setTheme(colorMap.getAppThemeResource());
 		super.onCreate(savedInstanceState);

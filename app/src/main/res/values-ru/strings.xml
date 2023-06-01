@@ -299,4 +299,6 @@
 	</string-array>
 
 	<string name="app_widget_description">Начать запись виджет</string>
+	<string name="mandatory_recorder_permission_message">Разрешите доступ к микрофону и хранилищу для приложения Запись аудио. Микрофон нужен для записи голоса во время записи аудио, а разрешение на использование хранилища необходимо для сохранения записи.</string>
+	<string name="turn_on">Включить</string>
 </resources>

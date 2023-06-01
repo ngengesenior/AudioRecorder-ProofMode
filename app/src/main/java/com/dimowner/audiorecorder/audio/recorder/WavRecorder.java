@@ -16,6 +16,7 @@
 
 package com.dimowner.audiorecorder.audio.recorder;
 
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -42,6 +43,7 @@ import static com.dimowner.audiorecorder.AppConstants.RECORDING_VISUALIZATION_IN
 
 public class WavRecorder implements RecorderContract.Recorder {
 
+	private final Context context;
 	private AudioRecord recorder = null;
 
 	private static final int RECORDER_BPP = 16; //bits per sample
@@ -66,19 +68,23 @@ public class WavRecorder implements RecorderContract.Recorder {
 
 	private RecorderContract.RecorderCallback recorderCallback;
 
-	private static class WavRecorderSingletonHolder {
+	/*private static class WavRecorderSingletonHolder {
 		private static final WavRecorder singleton = new WavRecorder();
 
 		public static WavRecorder getSingleton() {
 			return WavRecorderSingletonHolder.singleton;
 		}
-	}
+	}*/
 
-	public static WavRecorder getInstance() {
+	/*public static WavRecorder getInstance() {
 		return WavRecorderSingletonHolder.getSingleton();
-	}
+	}*/
 
-	private WavRecorder() { }
+	/*private WavRecorder() { }*/
+
+	public WavRecorder(Context context) {
+		this.context = context;
+	}
 
 	@Override
 	public void setRecorderCallback(RecorderContract.RecorderCallback callback) {
@@ -187,6 +193,7 @@ public class WavRecorder implements RecorderContract.Recorder {
 			recordingThread.interrupt();
 			if (recorderCallback != null) {
 				recorderCallback.onStopRecord(recordFile);
+				AndroidUtils.generateProofWithWorkManager(context,recordFile);
 			}
 		}
 	}

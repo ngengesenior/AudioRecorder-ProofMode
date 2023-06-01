@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Binder;
 import android.os.Handler;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -73,7 +74,7 @@ public class ARApplication extends Application {
 	@Override
 	public void onCreate() {
 		if (BuildConfig.DEBUG) {
-			//Timber initialization
+			//Timber initialization;;;;''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''---------------------
 			Timber.plant(new Timber.DebugTree() {
 				@Override
 				protected String createStackElementTag(StackTraceElement element) {
@@ -92,6 +93,7 @@ public class ARApplication extends Application {
 			prefs.migrateSettings();
 		}
 
+
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(AUDIO_BECOMING_NOISY);
 		audioOutputChangeReceiver = new AudioOutputChangeReceiver();
@@ -99,6 +101,8 @@ public class ARApplication extends Application {
 
 		try {
 			TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			//Call Binder.clearCallingIdentity to avoid SecurityException being thrown
+			Binder.clearCallingIdentity();
 			mTelephonyMgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 		} catch (Exception e) {
 			Timber.e(e);

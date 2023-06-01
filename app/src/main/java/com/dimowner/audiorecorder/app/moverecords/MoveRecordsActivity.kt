@@ -89,6 +89,9 @@ class MoveRecordsActivity : Activity() {
 		val colorMap = ARApplication.getInjector().provideColorMap()
 		setTheme(colorMap.appThemeResource)
 		super.onCreate(savedInstanceState)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			AndroidUtils.requestPermissionToPostNotification(this)
+		};
 		binding = ActivityMoveRecordsBinding.inflate(layoutInflater)
 		val view = binding.root
 		setContentView(view)
