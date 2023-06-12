@@ -287,4 +287,14 @@
     <string name="app_widget_description">Start recording widget</string>
     <string name="mandatory_recorder_permission_message">Allow Audio Recorder to access your microphone,storage.The microphone is required to capture the voice during recording, while the storage permission is required for saving a record.</string>
     <string name="turn_on">Turn On</string>
+    <string name="proofmode_settings_title">Strengthen your media’s verifiability by adding data to your proof.</string>
+    <string name="settings_description">Tap the icons to add or remove.</string>
+    <string name="settings_notary_desc">Registration with a third party that your media exists</string>
+    <string name="settings_location">Location</string>
+    <string name="settings_location_desc">GPS coordinates when media is taken</string>
+    <string name="settings_phone">Phone</string>
+    <string name="settings_phone_desc">Identification number of your phone</string>
+    <string name="settings_network">Network</string>
+    <string name="settings_network_desc">Name of the network(s) you’re connected to</string>
+    <string name="settings_notary">Notary</string>
 </resources>

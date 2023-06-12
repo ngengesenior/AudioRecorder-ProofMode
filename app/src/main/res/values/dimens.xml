@@ -43,4 +43,6 @@
 	<dimen name="panel_corner_radius">8dp</dimen>
 
 	<dimen name="menu_item_icon_size">24dp</dimen>
+	<dimen name="proofmode_settings_padding">16dp</dimen>
+	<dimen name="title_size">13sp</dimen>
 </resources>

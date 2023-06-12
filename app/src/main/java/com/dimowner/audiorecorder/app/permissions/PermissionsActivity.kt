@@ -24,11 +24,6 @@ class PermissionsActivity : AppCompatActivity() {
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: ActivityPermissionsBinding
 
-
-    private fun toast(message:String) {
-        Toast.makeText(this, message,Toast.LENGTH_LONG)
-            .show()
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPermissionsBinding.inflate(layoutInflater)
@@ -52,7 +47,6 @@ class PermissionsActivity : AppCompatActivity() {
                     // Explain to the user why the permissions are necessary and prompt again
                     @SuppressLint("NewApi")
                     if (shouldShowPermissionRationale()) {
-                        toast("Do we show the permission rationale again?")
                         // Show a Snackbar explaining why the permissions are necessary and prompt again when the "OK" button is clicked
                         Snackbar.make(
                             binding.root,
@@ -65,7 +59,6 @@ class PermissionsActivity : AppCompatActivity() {
                             .show()
                     } else {
                         // Permissions are denied with "never ask again", navigate to app settings or exit app
-                        toast("Never ask again was called. User has to go to settings")
                         Snackbar
                             .make(
                             binding.root,
@@ -73,7 +66,6 @@ class PermissionsActivity : AppCompatActivity() {
                             Snackbar.LENGTH_INDEFINITE
                         )
                             .setAction(getString(android.R.string.ok)) {
-                                toast("Yes go to app settings")
                                 navigateToAppSettings()
                             }
                             .addCallback(object : Snackbar.Callback() {
@@ -93,7 +85,6 @@ class PermissionsActivity : AppCompatActivity() {
 
         binding.buttonTurnOn.setOnClickListener {
 
-            toast("User wants to grant the permissions")
             requestPermissions()
         }
     }
