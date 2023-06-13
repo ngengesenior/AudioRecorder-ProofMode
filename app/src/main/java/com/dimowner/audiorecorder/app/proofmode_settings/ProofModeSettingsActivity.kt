@@ -1,9 +1,21 @@
 package com.dimowner.audiorecorder.app.proofmode_settings
 
+import android.Manifest
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.preference.PreferenceManager
 import android.widget.CheckBox
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.dimowner.audiorecorder.databinding.ActivityProofmodeSettingsBinding
+import com.proofmode.proofmodelib.utils.ProofModeUtils.saveNetworkProofPref
+import com.proofmode.proofmodelib.utils.ProofModeUtils.saveNotaryProofPref
+import com.proofmode.proofmodelib.utils.ProofModeUtils.savePhoneStateProofPref
 
 class ProofModeSettingsActivity:AppCompatActivity() {
     private lateinit var binding:ActivityProofmodeSettingsBinding
@@ -12,11 +24,20 @@ class ProofModeSettingsActivity:AppCompatActivity() {
     private lateinit var switchDevice: CheckBox
     private lateinit var switchNotarize: CheckBox
 
+    private lateinit var networkPermLauncher:ActivityResultLauncher<String>
+    private lateinit var phonePermLauncher:ActivityResultLauncher<String>
+    private lateinit var locationPermLauncher: ActivityResultLauncher<String>
+    private val prefs:SharedPreferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProofmodeSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()
+        initOnCheckedChangeListeners()
+        initPermLaunchers()
 
     }
 
@@ -25,6 +46,102 @@ class ProofModeSettingsActivity:AppCompatActivity() {
         switchNetwork = binding.switchNetwork
         switchDevice = binding.switchDevice
         switchNotarize = binding.switchNotarize
+    }
+
+    private fun initPermLaunchers() {
+        networkPermLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                prefs.saveNetworkProofPref(it)
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_NETWORK_STATE)){
+                    createDialogAndLaunch(message = "Network state is required to save network proof data using ProofMode",
+                    onOkClick = {
+                        networkPermLauncher.launch(Manifest.permission.ACCESS_NETWORK_STATE)
+                    }, onCancelClick = {
+                        prefs.saveNetworkProofPref(false)
+                        })
+                } else {
+                    Toast.makeText(this, "You can turn on network permission in settings to enable network data to be saved with proof", Toast.LENGTH_SHORT).show()
+                    switchNetwork.isChecked = false
+                }
+            }
+
+        }
+
+        phonePermLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                prefs.savePhoneStateProofPref(it)
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_PHONE_STATE)){
+                    createDialogAndLaunch(message = "Phone state is used to save certain phone info with proof data",
+                        onOkClick = {
+                            networkPermLauncher.launch(Manifest.permission.READ_PHONE_STATE)
+                        }, onCancelClick = {
+                            prefs.saveNetworkProofPref(false)
+                        })
+                } else {
+                    Toast.makeText(this, "You can turn on phone permission in settings to enable phone data to be saved with proof", Toast.LENGTH_SHORT).show()
+                    switchDevice.isChecked = false
+
+                }
+            }
+
+        }
+
+        locationPermLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+
+        }
+    }
+
+    private fun createDialogAndLaunch(message:String,onOkClick: ()-> Unit, onCancelClick:(()->Unit)? = null) {
+        val dialog = AlertDialog.Builder(this)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok){ _,_ ->
+                onOkClick()
+            }
+            .setNegativeButton(android.R.string.cancel) {_,_ ->
+                onCancelClick?.invoke()
+
+            }
+            .setCancelable(false)
+        dialog.show()
+    }
+
+    private fun initOnCheckedChangeListeners() {
+        switchNetwork.setOnCheckedChangeListener{ _, isChecked ->
+            if (isChecked){
+                if (ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED){
+                    networkPermLauncher.launch(Manifest.permission.ACCESS_NETWORK_STATE)
+                }
+
+            } else {
+                prefs.saveNetworkProofPref(false)
+            }
+
+
+        }
+
+        switchDevice.setOnCheckedChangeListener {_,isChecked ->
+
+            if (isChecked) {
+                if (ActivityCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED){
+                    phonePermLauncher.launch(Manifest.permission.READ_PHONE_STATE)
+                }
+            } else {
+                prefs.savePhoneStateProofPref(false)
+            }
+
+        }
+
+        switchNotarize.setOnCheckedChangeListener{_,isChecked ->
+            prefs.saveNotaryProofPref(isChecked)
+        }
+
+        switchLocation.setOnCheckedChangeListener{_,isChecked ->
+
+        }
+
+
     }
 
 

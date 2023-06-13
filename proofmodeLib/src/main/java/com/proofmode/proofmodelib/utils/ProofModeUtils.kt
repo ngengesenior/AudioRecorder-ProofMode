@@ -2,8 +2,11 @@ package com.proofmode.proofmodelib.utils
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
+import androidx.preference.PreferenceManager
 import androidx.core.content.FileProvider
+import androidx.core.content.edit
 import androidx.work.Data
 import org.witness.proofmode.ProofMode
 import org.witness.proofmode.service.MediaWatcher
@@ -88,6 +91,28 @@ object ProofModeUtils {
 
     fun retrieveOrCreateHash(uriMedia: Uri, context: Context):String {
         return MediaWatcher.getInstance(context).processUri(uriMedia,true, Date())
+    }
+
+    fun SharedPreferences.saveLocationProofPref(value: Boolean) {
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_LOCATION,value)
+    }
+
+    fun SharedPreferences.saveNetworkProofPref(value: Boolean) {
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_NETWORK,value)
+    }
+    fun SharedPreferences.savePhoneStateProofPref(value: Boolean) {
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_PHONE,true)
+    }
+
+
+    fun SharedPreferences.saveNotaryProofPref(value: Boolean) {
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_NOTARY,value)
+    }
+
+    private fun SharedPreferences.saveProofDataPointToPrefs(key: String,value:Boolean){
+        edit(commit = true){
+            putBoolean(key,value)
+        }
     }
 
 }
