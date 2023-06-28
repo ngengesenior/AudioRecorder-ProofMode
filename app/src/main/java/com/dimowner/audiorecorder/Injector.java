@@ -54,264 +54,269 @@ import com.dimowner.audiorecorder.data.database.TrashDataSource;
 
 public class Injector {
 
-	private final Context context;
+    private final Context context;
 
-	private BackgroundQueue loadingTasks;
-	private BackgroundQueue recordingTasks;
-	private BackgroundQueue importTasks;
-	private BackgroundQueue processingTasks;
-	private BackgroundQueue copyTasks;
+    private BackgroundQueue loadingTasks;
+    private BackgroundQueue recordingTasks;
+    private BackgroundQueue importTasks;
+    private BackgroundQueue processingTasks;
+    private BackgroundQueue copyTasks;
 
-	private MainContract.UserActionsListener mainPresenter;
-	private RecordsContract.UserActionsListener recordsPresenter;
-	private SettingsContract.UserActionsListener settingsPresenter;
-	private LostRecordsContract.UserActionsListener lostRecordsPresenter;
-	private FileBrowserContract.UserActionsListener fileBrowserPresenter;
-	private TrashContract.UserActionsListener trashPresenter;
-	private SetupContract.UserActionsListener setupPresenter;
+    private MainContract.UserActionsListener mainPresenter;
+    private RecordsContract.UserActionsListener recordsPresenter;
+    private SettingsContract.UserActionsListener settingsPresenter;
+    private LostRecordsContract.UserActionsListener lostRecordsPresenter;
+    private FileBrowserContract.UserActionsListener fileBrowserPresenter;
+    private TrashContract.UserActionsListener trashPresenter;
+    private SetupContract.UserActionsListener setupPresenter;
 
-	private MoveRecordsViewModel moveRecordsViewModel;
+    private MoveRecordsViewModel moveRecordsViewModel;
 
-	private AudioPlayerNew audioPlayer = null;
+    private AudioPlayerNew audioPlayer = null;
 
-	public Injector(Context context) {
-		this.context = context;
-	}
+    public Injector(Context context) {
+        this.context = context;
+    }
 
-	public Prefs providePrefs() {
-		return PrefsImpl.getInstance(context);
-	}
+    public Prefs providePrefs() {
+        return PrefsImpl.getInstance(context);
+    }
 
-	public RecordsDataSource provideRecordsDataSource() {
-		return RecordsDataSource.getInstance(context);
-	}
+    public RecordsDataSource provideRecordsDataSource() {
+        return RecordsDataSource.getInstance(context);
+    }
 
-	public TrashDataSource provideTrashDataSource() {
-		return TrashDataSource.getInstance(context);
-	}
 
-	public FileRepository provideFileRepository() {
-		return FileRepositoryImpl.getInstance(context, providePrefs());
-	}
+    public TrashDataSource provideTrashDataSource() {
+        return TrashDataSource.getInstance(context);
+    }
 
-	public LocalRepository provideLocalRepository() {
-		return LocalRepositoryImpl.getInstance(provideRecordsDataSource(), provideTrashDataSource(), provideFileRepository(), providePrefs());
-	}
+    public FileRepository provideFileRepository() {
+        return FileRepositoryImpl.getInstance(context, providePrefs());
+    }
 
-	public AppRecorder provideAppRecorder() {
-		return AppRecorderImpl.getInstance(provideAudioRecorder(), provideLocalRepository(),
-				provideLoadingTasksQueue(), providePrefs());
-	}
+    public LocalRepository provideLocalRepository() {
+        return LocalRepositoryImpl.getInstance(provideRecordsDataSource(), provideTrashDataSource(), provideFileRepository(), providePrefs());
+    }
 
-	public AudioWaveformVisualization provideAudioWaveformVisualization() {
-		return new AudioWaveformVisualization(provideProcessingTasksQueue());
-	}
+    public AppRecorder provideAppRecorder() {
+        return AppRecorderImpl.getInstance(provideAudioRecorder(), provideLocalRepository(),
+                provideLoadingTasksQueue(), providePrefs());
+    }
 
-	public BackgroundQueue provideLoadingTasksQueue() {
-		if (loadingTasks == null) {
-			loadingTasks = new BackgroundQueue("LoadingTasks");
-		}
-		return loadingTasks;
-	}
+    public AudioWaveformVisualization provideAudioWaveformVisualization() {
+        return new AudioWaveformVisualization(provideProcessingTasksQueue());
+    }
 
-	public BackgroundQueue provideRecordingTasksQueue() {
-		if (recordingTasks == null) {
-			recordingTasks = new BackgroundQueue("RecordingTasks");
-		}
-		return recordingTasks;
-	}
+    public BackgroundQueue provideLoadingTasksQueue() {
+        if (loadingTasks == null) {
+            loadingTasks = new BackgroundQueue("LoadingTasks");
+        }
+        return loadingTasks;
+    }
 
-	public BackgroundQueue provideImportTasksQueue() {
-		if (importTasks == null) {
-			importTasks = new BackgroundQueue("ImportTasks");
-		}
-		return importTasks;
-	}
+    public BackgroundQueue provideRecordingTasksQueue() {
+        if (recordingTasks == null) {
+            recordingTasks = new BackgroundQueue("RecordingTasks");
+        }
+        return recordingTasks;
+    }
 
-	public BackgroundQueue provideProcessingTasksQueue() {
-		if (processingTasks == null) {
-			processingTasks = new BackgroundQueue("ProcessingTasks");
-		}
-		return processingTasks;
-	}
+    public BackgroundQueue provideImportTasksQueue() {
+        if (importTasks == null) {
+            importTasks = new BackgroundQueue("ImportTasks");
+        }
+        return importTasks;
+    }
 
-	public BackgroundQueue provideCopyTasksQueue() {
-		if (copyTasks == null) {
-			copyTasks = new BackgroundQueue("CopyTasks");
-		}
-		return copyTasks;
-	}
+    public BackgroundQueue provideProcessingTasksQueue() {
+        if (processingTasks == null) {
+            processingTasks = new BackgroundQueue("ProcessingTasks");
+        }
+        return processingTasks;
+    }
 
-	public ColorMap provideColorMap() {
-		return ColorMap.getInstance(providePrefs());
-	}
+    public BackgroundQueue provideCopyTasksQueue() {
+        if (copyTasks == null) {
+            copyTasks = new BackgroundQueue("CopyTasks");
+        }
+        return copyTasks;
+    }
 
-	public SettingsMapper provideSettingsMapper() {
-		return SettingsMapper.getInstance(context);
-	}
+    public ColorMap provideColorMap() {
+        return ColorMap.getInstance(providePrefs());
+    }
 
-	public PlayerContractNew.Player provideAudioPlayer() {
-		if (audioPlayer == null) {
-			synchronized (PlayerContractNew.Player.class) {
-				if (audioPlayer == null) {
-					audioPlayer = new AudioPlayerNew();
-				}
-			}
-		}
-		return audioPlayer;
-	}
+    public SettingsMapper provideSettingsMapper() {
+        return SettingsMapper.getInstance(context);
+    }
 
-	public RecorderContract.Recorder provideAudioRecorder() {
-		switch (providePrefs().getSettingRecordingFormat()) {
-			default:
-			case AppConstants.FORMAT_M4A:
-				return new AudioRecorder(this.context);
-			case AppConstants.FORMAT_WAV:
-				return new WavRecorder(context);
-			case AppConstants.FORMAT_3GP:
-				return new ThreeGpRecorder(context);
-		}
-	}
+    public PlayerContractNew.Player provideAudioPlayer() {
+        if (audioPlayer == null) {
+            synchronized (PlayerContractNew.Player.class) {
+                if (audioPlayer == null) {
+                    audioPlayer = new AudioPlayerNew();
+                }
+            }
+        }
+        return audioPlayer;
+    }
 
-	public MainContract.UserActionsListener provideMainPresenter() {
-		if (mainPresenter == null) {
-			mainPresenter = new MainPresenter(providePrefs(), provideFileRepository(),
-					provideLocalRepository(), provideAudioPlayer(), provideAppRecorder(),
-					provideRecordingTasksQueue(), provideLoadingTasksQueue(), provideProcessingTasksQueue(),
-					provideImportTasksQueue(), provideSettingsMapper());
-		}
-		return mainPresenter;
-	}
+    public RecorderContract.Recorder provideAudioRecorder() {
+        switch (providePrefs().getSettingRecordingFormat()) {
+            default:
+            case AppConstants.FORMAT_M4A:
+                return new AudioRecorder(this.context);
+            case AppConstants.FORMAT_WAV:
+                return new WavRecorder(context);
+            case AppConstants.FORMAT_3GP:
+                return new ThreeGpRecorder(context);
+        }
+    }
 
-	public RecordsContract.UserActionsListener provideRecordsPresenter() {
-		if (recordsPresenter == null) {
-			recordsPresenter = new RecordsPresenter(provideLocalRepository(), provideFileRepository(),
-					provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideAudioPlayer(), provideAppRecorder(), providePrefs());
-		}
-		return recordsPresenter;
-	}
+    public MainContract.UserActionsListener provideMainPresenter() {
+        if (mainPresenter == null) {
+            mainPresenter = new MainPresenter(providePrefs(), provideFileRepository(),
+                    provideLocalRepository(), provideAudioPlayer(), provideAppRecorder(),
+                    provideRecordingTasksQueue(), provideLoadingTasksQueue(), provideProcessingTasksQueue(),
+                    provideImportTasksQueue(), provideSettingsMapper());
+        }
+        return mainPresenter;
+    }
 
-	public SettingsContract.UserActionsListener provideSettingsPresenter() {
-		if (settingsPresenter == null) {
-			settingsPresenter = new SettingsPresenter(provideLocalRepository(), provideFileRepository(),
-					provideRecordingTasksQueue(), provideLoadingTasksQueue(), providePrefs(),
-					provideSettingsMapper(), provideAppRecorder());
-		}
-		return settingsPresenter;
-	}
+    public RecordsContract.UserActionsListener provideRecordsPresenter() {
+        if (recordsPresenter == null) {
+            recordsPresenter = new RecordsPresenter(provideLocalRepository(), provideFileRepository(),
+                    provideLoadingTasksQueue(), provideRecordingTasksQueue(),
+                    provideAudioPlayer(), provideAppRecorder(), providePrefs());
+        }
+        return recordsPresenter;
+    }
 
-	public TrashContract.UserActionsListener provideTrashPresenter() {
-		if (trashPresenter == null) {
-			trashPresenter = new TrashPresenter(provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideFileRepository(), provideLocalRepository());
-		}
-		return trashPresenter;
-	}
+    public SettingsContract.UserActionsListener provideSettingsPresenter() {
+        if (settingsPresenter == null) {
+            settingsPresenter = new SettingsPresenter(provideLocalRepository(), provideFileRepository(),
+                    provideRecordingTasksQueue(), provideLoadingTasksQueue(), providePrefs(),
+                    provideSettingsMapper(), provideAppRecorder());
+        }
+        return settingsPresenter;
+    }
 
-	public SetupContract.UserActionsListener provideSetupPresenter() {
-		if (setupPresenter == null) {
-			setupPresenter = new SetupPresenter(providePrefs());
-		}
-		return setupPresenter;
-	}
+    public TrashContract.UserActionsListener provideTrashPresenter() {
+        if (trashPresenter == null) {
+            trashPresenter = new TrashPresenter(provideLoadingTasksQueue(), provideRecordingTasksQueue(),
+                    provideFileRepository(), provideLocalRepository());
+        }
+        return trashPresenter;
+    }
 
-	public MoveRecordsViewModel provideMoveRecordsViewModel() {
-		if (moveRecordsViewModel == null) {
-			moveRecordsViewModel = new MoveRecordsViewModel(
-					provideLoadingTasksQueue(),
-					provideLocalRepository(),
-					provideFileRepository(),
-					provideSettingsMapper(),
-					provideAudioPlayer(),
-					provideAppRecorder(),
-					providePrefs()
-			);
-		}
-		return moveRecordsViewModel;
-	}
+    public SetupContract.UserActionsListener provideSetupPresenter() {
+        if (setupPresenter == null) {
+            setupPresenter = new SetupPresenter(providePrefs());
+        }
+        return setupPresenter;
+    }
 
-	public LostRecordsContract.UserActionsListener provideLostRecordsPresenter() {
-		if (lostRecordsPresenter == null) {
-			lostRecordsPresenter = new LostRecordsPresenter(provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideLocalRepository(), providePrefs());
-		}
-		return lostRecordsPresenter;
-	}
+    public MoveRecordsViewModel provideMoveRecordsViewModel() {
+        if (moveRecordsViewModel == null) {
+            moveRecordsViewModel = new MoveRecordsViewModel(
+                    provideLoadingTasksQueue(),
+                    provideLocalRepository(),
+                    provideFileRepository(),
+                    provideSettingsMapper(),
+                    provideAudioPlayer(),
+                    provideAppRecorder(),
+                    providePrefs()
+            );
+        }
+        return moveRecordsViewModel;
+    }
 
-	public FileBrowserContract.UserActionsListener provideFileBrowserPresenter() {
-		if (fileBrowserPresenter == null) {
-			fileBrowserPresenter = new FileBrowserPresenter(providePrefs(), provideAppRecorder(), provideImportTasksQueue(),
-					provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideLocalRepository(), provideFileRepository());
-		}
-		return fileBrowserPresenter;
-	}
+    public LostRecordsContract.UserActionsListener provideLostRecordsPresenter() {
+        if (lostRecordsPresenter == null) {
+            lostRecordsPresenter = new LostRecordsPresenter(provideLoadingTasksQueue(), provideRecordingTasksQueue(),
+                    provideLocalRepository(), providePrefs());
+        }
+        return lostRecordsPresenter;
+    }
 
-	public void releaseTrashPresenter() {
-		if (trashPresenter != null) {
-			trashPresenter.clear();
-			trashPresenter = null;
-		}
-	}
+    public FileBrowserContract.UserActionsListener provideFileBrowserPresenter() {
+        if (fileBrowserPresenter == null) {
+            fileBrowserPresenter = new FileBrowserPresenter(providePrefs(), provideAppRecorder(), provideImportTasksQueue(),
+                    provideLoadingTasksQueue(), provideRecordingTasksQueue(),
+                    provideLocalRepository(), provideFileRepository());
+        }
+        return fileBrowserPresenter;
+    }
 
-	public void releaseLostRecordsPresenter() {
-		if (lostRecordsPresenter != null) {
-			lostRecordsPresenter.clear();
-			lostRecordsPresenter = null;
-		}
-	}
+    public void releaseTrashPresenter() {
+        if (trashPresenter != null) {
+            trashPresenter.clear();
+            trashPresenter = null;
+        }
+    }
 
-	public void releaseFileBrowserPresenter() {
-		if (fileBrowserPresenter != null) {
-			fileBrowserPresenter.clear();
-			fileBrowserPresenter = null;
-		}
-	}
+    public void releaseLostRecordsPresenter() {
+        if (lostRecordsPresenter != null) {
+            lostRecordsPresenter.clear();
+            lostRecordsPresenter = null;
+        }
+    }
 
-	public void releaseRecordsPresenter() {
-		if (recordsPresenter != null) {
-			recordsPresenter.clear();
-			recordsPresenter = null;
-		}
-	}
+    public void releaseFileBrowserPresenter() {
+        if (fileBrowserPresenter != null) {
+            fileBrowserPresenter.clear();
+            fileBrowserPresenter = null;
+        }
+    }
 
-	public void releaseMainPresenter() {
-		if (mainPresenter != null) {
-			mainPresenter.clear();
-			mainPresenter = null;
-		}
-	}
+    public void releaseRecordsPresenter() {
+        if (recordsPresenter != null) {
+            recordsPresenter.clear();
+            recordsPresenter = null;
+        }
+    }
 
-	public void releaseSettingsPresenter() {
-		if (settingsPresenter != null) {
-			settingsPresenter.clear();
-			settingsPresenter = null;
-		}
-	}
+    public void releaseMainPresenter() {
+        if (mainPresenter != null) {
+            mainPresenter.clear();
+            mainPresenter = null;
+        }
+    }
 
-	public void releaseSetupPresenter() {
-		if (setupPresenter != null) {
-			setupPresenter.clear();
-			setupPresenter = null;
-		}
-	}
+    public void releaseSettingsPresenter() {
+        if (settingsPresenter != null) {
+            settingsPresenter.clear();
+            settingsPresenter = null;
+        }
+    }
 
-	public void releaseMoveRecordsViewModel() {
-		if (moveRecordsViewModel != null) {
-			moveRecordsViewModel.clear();
-			moveRecordsViewModel = null;
-		}
-	}
+    public void releaseSetupPresenter() {
+        if (setupPresenter != null) {
+            setupPresenter.clear();
+            setupPresenter = null;
+        }
+    }
 
-	public void closeTasks() {
-		loadingTasks.cleanupQueue();
-		loadingTasks.close();
-		importTasks.cleanupQueue();
-		importTasks.close();
-		processingTasks.cleanupQueue();
-		processingTasks.close();
-		recordingTasks.cleanupQueue();
-		recordingTasks.close();
-	}
+    public void releaseMoveRecordsViewModel() {
+        if (moveRecordsViewModel != null) {
+            moveRecordsViewModel.clear();
+            moveRecordsViewModel = null;
+        }
+    }
+
+    public void closeTasks() {
+        loadingTasks.cleanupQueue();
+        loadingTasks.close();
+        importTasks.cleanupQueue();
+        importTasks.close();
+        processingTasks.cleanupQueue();
+        processingTasks.close();
+        recordingTasks.cleanupQueue();
+        recordingTasks.close();
+    }
+
+    public Context getContext() {
+        return context;
+    }
 }

@@ -18,6 +18,10 @@ package com.dimowner.audiorecorder.app.main;
 
 import android.content.Context;
 import android.net.Uri;
+
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkRequest;
+
 import com.dimowner.audiorecorder.Contract;
 import com.dimowner.audiorecorder.IntArrayList;
 import com.dimowner.audiorecorder.app.info.RecordInfo;
@@ -29,116 +33,142 @@ import java.util.List;
 
 public interface MainContract {
 
-	interface View extends Contract.View {
+    interface View extends Contract.View {
 
-		void keepScreenOn(boolean on);
-		void showRecordingStart();
-		void showRecordingStop();
-		void showRecordingPause();
-		void showRecordingResume();
-		void onRecordingProgress(long mills, int amp);
-		void startWelcomeScreen();
+        void keepScreenOn(boolean on);
 
-		void askRecordingNewName(long id, File file,  boolean showCheckbox);
+        void showRecordingStart();
 
-		void startRecordingService();
+        void showRecordingStop();
 
-		void startPlaybackService(String name);
+        void showRecordingPause();
 
-		void showPlayStart(boolean animate);
-		void showPlayPause();
-		void showPlayStop();
-		void onPlayProgress(long mills, int percent);
+        void showRecordingResume();
 
-		void showImportStart();
-		void hideImportProgress();
+        void onRecordingProgress(long mills, int amp);
 
-		void showOptionsMenu();
-		void hideOptionsMenu();
+        void startWelcomeScreen();
 
-		void showRecordProcessing();
-		void hideRecordProcessing();
+        void askRecordingNewName(long id, File file, boolean showCheckbox);
 
-		void showWaveForm(int[] waveForm, long duration, long playbackMills);
-		void waveFormToStart();
-		void showDuration(String duration);
-		void showRecordingProgress(String progress);
-		void showName(String name);
-		void showInformation(String info);
-		void decodeRecord(int id);
+        void startRecordingService();
 
-		void askDeleteRecord(String name);
+        void startPlaybackService(String name);
 
-		void askDeleteRecordForever();
+        void showPlayStart(boolean animate);
 
-		void showRecordInfo(RecordInfo info);
+        void showPlayPause();
 
-		void updateRecordingView(IntArrayList data, long durationMills);
+        void showPlayStop();
 
-		void showRecordsLostMessage(List<Record> list);
+        void onPlayProgress(long mills, int percent);
 
-		void shareRecord(Record record);
+        void showImportStart();
 
-		void openFile(Record record);
+        void hideImportProgress();
 
-		void downloadRecord(Record record);
+        void showOptionsMenu();
 
-		void showMigratePublicStorageWarning();
-	}
+        void hideOptionsMenu();
 
-	interface UserActionsListener extends Contract.UserActionsListener<MainContract.View> {
+        void showRecordProcessing();
 
-		void checkFirstRun();
+        void hideRecordProcessing();
 
-		void storeInPrivateDir(Context context);
+        void showWaveForm(int[] waveForm, long duration, long playbackMills);
 
-		void setAudioRecorder(RecorderContract.Recorder recorder);
+        void waveFormToStart();
 
-		void pauseUnpauseRecording(Context context);
-		void stopRecording(boolean deleteRecord);
-		void cancelRecording();
+        void showDuration(String duration);
 
-		void startPlayback();
-		void seekPlayback(long mills);
-		void stopPlayback();
+        void showRecordingProgress(String progress);
 
-		void renameRecord(long id, String name, String extension);
+        void showName(String name);
 
-		void decodeRecord(long id);
+        void showInformation(String info);
 
-		void loadActiveRecord();
+        void decodeRecord(int id);
 
-		void checkPublicStorageRecords();
+        void askDeleteRecord(String name);
 
-		void setAskToRename(boolean value);
+        void askDeleteRecordForever();
 
-		void importAudioFile(Context context, Uri uri);
+        void showRecordInfo(RecordInfo info);
 
-		void updateRecordingDir(Context context);
+        void updateRecordingView(IntArrayList data, long durationMills);
 
-		void setStoragePrivate(Context context);
+        void showRecordsLostMessage(List<Record> list);
 
-		void onShareRecordClick();
+        void shareRecord(Record record);
 
-		void onRenameRecordClick();
+        void openFile(Record record);
 
-		void onOpenFileClick();
+        void downloadRecord(Record record);
 
-		void onSaveAsClick();
+        void showMigratePublicStorageWarning();
 
-		void onDeleteClick();
+        void generateProof(File file);
+    }
 
-		//TODO: Remove this getters
-		boolean isStorePublic();
+    interface UserActionsListener extends Contract.UserActionsListener<MainContract.View> {
 
-		String getActiveRecordPath();
+        void checkFirstRun();
 
-		void deleteActiveRecord(boolean forever);
+        void storeInPrivateDir(Context context);
 
-		void onRecordInfo();
+        void setAudioRecorder(RecorderContract.Recorder recorder);
 
-		void disablePlaybackProgressListener();
+        void pauseUnpauseRecording(Context context);
 
-		void enablePlaybackProgressListener();
-	}
+        void stopRecording(boolean deleteRecord);
+
+        void cancelRecording();
+
+        void startPlayback();
+
+        void seekPlayback(long mills);
+
+        void stopPlayback();
+
+        void renameRecord(long id, String name, String extension);
+
+        void decodeRecord(long id);
+
+        void loadActiveRecord();
+
+        void checkPublicStorageRecords();
+
+        void setAskToRename(boolean value);
+
+        void importAudioFile(Context context, Uri uri);
+
+        void updateRecordingDir(Context context);
+
+        void setStoragePrivate(Context context);
+
+        void onShareRecordClick();
+
+        void onRenameRecordClick();
+
+        void onOpenFileClick();
+
+        void onSaveAsClick();
+
+        void onDeleteClick();
+
+        //TODO: Remove this getters
+        boolean isStorePublic();
+
+        String getActiveRecordPath();
+
+        void deleteActiveRecord(boolean forever);
+
+        void onRecordInfo();
+
+        void disablePlaybackProgressListener();
+
+        void enablePlaybackProgressListener();
+
+        OneTimeWorkRequest generatedProof(File file, Context context);
+    }
 }

@@ -4,12 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import androidx.preference.PreferenceManager
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.work.Data
 import org.witness.proofmode.ProofMode
+import org.witness.proofmode.crypto.HashUtils
 import org.witness.proofmode.service.MediaWatcher
+import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -22,13 +23,17 @@ object ProofModeUtils {
     const val MEDIA_KEY = "audio"
     const val MEDIA_HASH = "mediaHash"
     val TAG = ProofModeUtils::class.simpleName
+    private const val DOCUMENT_AUDIO =
+        "content://com.android.providers.media.documents/document/audio%3A"
+    private const val MEDIA_AUDIO = "content://media/external/audio/media/"
 
     fun makeProofZip(proofDirPath: File, context: Context): File {
         val outputZipFile = File(context.filesDir, proofDirPath.name + ".zip")
         ZipOutputStream(BufferedOutputStream(FileOutputStream(outputZipFile))).use { zos ->
             proofDirPath.walkTopDown().forEach { file ->
-                val zipFileName = file.absolutePath.removePrefix(proofDirPath.absolutePath).removePrefix("/")
-                val entry = ZipEntry( "$zipFileName${(if (file.isDirectory) "/" else "" )}")
+                val zipFileName =
+                    file.absolutePath.removePrefix(proofDirPath.absolutePath).removePrefix("/")
+                val entry = ZipEntry("$zipFileName${(if (file.isDirectory) "/" else "")}")
                 zos.putNextEntry(entry)
                 if (file.isFile) {
                     file.inputStream().copyTo(zos)
@@ -45,16 +50,15 @@ object ProofModeUtils {
     }
 
 
-
-    fun createData(key:String, value:Any?) : Data {
+    fun createData(key: String, value: Any?): Data {
         val builder = Data.Builder()
         value?.let {
-            builder.putString(key,value.toString())
+            builder.putString(key, value.toString())
         }
         return builder.build()
     }
 
-    fun shareZipFile(context: Context, zipFile: File,packageName:String) {
+    fun shareZipFile(context: Context, zipFile: File, packageName: String) {
         val authority = "$packageName.provider"
         val uri = FileProvider.getUriForFile(context, authority, zipFile)
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -67,14 +71,14 @@ object ProofModeUtils {
     }
 
     fun generateProof(uriMedia: Uri, context: Context): String {
-        ProofMode.setProofPoints(context.applicationContext,true,true,true,true)
-        val proofHash = ProofMode.generateProof(context.applicationContext,uriMedia)
+        ProofMode.setProofPoints(context.applicationContext, true, true, true, true)
+        val proofHash = ProofMode.generateProof(context.applicationContext, uriMedia)
         return proofHash ?: ""
     }
 
-    fun generateProof(file: File,context: Context,packageName: String):String {
-        val uri = getUriForFile(file,context,packageName)
-        return generateProof(uri,context)
+    fun generateProof(file: File, context: Context, packageName: String): String {
+        val uri = getUriForFile(file, context, packageName)
+        return generateProof(uri, context)
     }
 
     /**
@@ -84,35 +88,63 @@ object ProofModeUtils {
     }
      */
 
-    fun getUriForFile(file: File, context: Context,packageName: String):Uri{
-       return FileProvider.getUriForFile(context.applicationContext,"$packageName.app_file_provider",file)
+    fun getUriForFile(file: File, context: Context, packageName: String): Uri {
+        return FileProvider.getUriForFile(
+            context.applicationContext,
+            "$packageName.app_file_provider",
+            file
+        )
     }
 
 
-    fun retrieveOrCreateHash(uriMedia: Uri, context: Context):String {
-        return MediaWatcher.getInstance(context).processUri(uriMedia,true, Date())
+    fun retrieveOrCreateHash(uriMedia: Uri, context: Context): String {
+        return MediaWatcher.getInstance(context).processUri(uriMedia, true, Date())
     }
 
     fun SharedPreferences.saveLocationProofPref(value: Boolean) {
-        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_LOCATION,value)
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_LOCATION, value)
     }
 
     fun SharedPreferences.saveNetworkProofPref(value: Boolean) {
-        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_NETWORK,value)
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_NETWORK, value)
     }
+
     fun SharedPreferences.savePhoneStateProofPref(value: Boolean) {
-        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_PHONE,true)
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_PHONE, value)
     }
 
 
     fun SharedPreferences.saveNotaryProofPref(value: Boolean) {
-        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_NOTARY,value)
+        saveProofDataPointToPrefs(ProofMode.PREF_OPTION_NOTARY, value)
     }
 
-    private fun SharedPreferences.saveProofDataPointToPrefs(key: String,value:Boolean){
-        edit(commit = true){
-            putBoolean(key,value)
+    private fun SharedPreferences.saveProofDataPointToPrefs(key: String, value: Boolean) {
+        edit(commit = true) {
+            putBoolean(key, value)
         }
+    }
+
+    fun proofExistsForMedia(context: Context, mediaUri: Uri): String? {
+        var mediaUri = mediaUri
+        var sMediaUri = mediaUri.toString()
+        if (sMediaUri.contains(DOCUMENT_AUDIO)) {
+            sMediaUri = sMediaUri.replace(DOCUMENT_AUDIO, MEDIA_AUDIO)
+            mediaUri = Uri.parse(sMediaUri)
+        }
+        val hash = HashUtils.getSHA256FromFileContent(
+            context.applicationContext.contentResolver.openInputStream(mediaUri)
+        )
+        if (hash != null) {
+            //hashCache[sMediaUri] = hash
+            Timber.d("Proof check if exists for URI %s and hash %s", mediaUri, hash)
+            val fileFolder = MediaWatcher.getHashStorageDir(context.applicationContext, hash)
+            return if (fileFolder != null) {
+                val fileMediaProof = File(fileFolder, hash + ProofMode.PROOF_FILE_TAG)
+                //generate now?
+                if (fileMediaProof.exists()) hash else null
+            } else null
+        }
+        return null
     }
 
 }

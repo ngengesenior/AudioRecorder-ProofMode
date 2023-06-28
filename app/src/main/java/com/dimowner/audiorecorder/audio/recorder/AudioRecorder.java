@@ -50,15 +50,13 @@ import timber.log.Timber;
 public class AudioRecorder implements RecorderContract.Recorder {
 
     private final Context context;
+    private final AtomicBoolean isRecording = new AtomicBoolean(false);
+    private final AtomicBoolean isPaused = new AtomicBoolean(false);
+    private final Handler handler = new Handler();
     private MediaRecorder recorder = null;
     private File recordFile = null;
     private long updateTime = 0;
     private long durationMills = 0;
-
-    private final AtomicBoolean isRecording = new AtomicBoolean(false);
-    private final AtomicBoolean isPaused = new AtomicBoolean(false);
-    private final Handler handler = new Handler();
-
     private RecorderContract.RecorderCallback recorderCallback;
 
 	/*private static class RecorderSingletonHolder {
@@ -186,7 +184,7 @@ public class AudioRecorder implements RecorderContract.Recorder {
             }
 
             // Generate the proof here
-            AndroidUtils.generateProofWithWorkManager(context,recordFile);
+            //AndroidUtils.generateProofWithWorkManager(context,recordFile);
             durationMills = 0;
             recordFile = null;
             isRecording.set(false);
