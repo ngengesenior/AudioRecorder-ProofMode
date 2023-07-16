@@ -22,6 +22,11 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 
+import androidx.annotation.NonNull;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+
 import com.dimowner.audiorecorder.ARApplication;
 import com.dimowner.audiorecorder.AppConstants;
 import com.dimowner.audiorecorder.BackgroundQueue;
@@ -45,18 +50,12 @@ import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
 import com.proofmode.proofmodelib.utils.ProofModeUtils;
-import com.proofmode.proofmodelib.worker.GenerateProofWorker;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.work.Constraints;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
 
 import timber.log.Timber;
 
@@ -177,7 +176,28 @@ public class MainPresenter implements MainContract.UserActionsListener {
                             }
                         }
                         record = rec;
+                        //Uri fileUri = Uri.fromFile(new File(record.getPath()));
+                        onGenerateProof(ARApplication.injector.getContext(), record);
+                        //Timber.d("onRecordingStopped: %s", fileUri.toString());
                         songDuration = rec.getDuration();
+
+
+                        /**
+                         * Generate proof here
+                         */
+                        Context context = ARApplication.injector.getContext();
+                        Timber.d("---------------------------------------------------");
+                        Timber.d("Getting Record info");
+                        Timber.d("Rec:%s", rec.toString());
+                        Timber.d("Record: %s", record.toString());
+                        Timber.d("--------------------------------------------------");
+                        /*//File updateFile = new File(record.getPath());
+                        //Uri fileUri = ProofModeUtils.INSTANCE.getUriForFile(updateFile, context, context.getPackageName());
+                        String proofExists = ProofModeUtils.INSTANCE.proofExistsForMedia(context, fileUri);
+                        if (proofExists == null || proofExists.isEmpty()) {
+                            //AndroidUtils.generateProofWithWorkManager(context, fileUri);
+                            //view.generateProof(updateFile);
+                        }*/
                         if (view != null) {
                             view.showWaveForm(rec.getAmps(), songDuration, 0);
                             view.showName(rec.getName());
@@ -186,20 +206,6 @@ public class MainPresenter implements MainContract.UserActionsListener {
                         }
                         updateInformation(rec.getFormat(), rec.getSampleRate(), rec.getSize());
                         //TODO: I am sure we have to generate proof here after updating the info
-                        Context context = ARApplication.injector.getContext();
-                        Timber.d("---------------------------------------------------");
-                        Timber.d("Getting Record info");
-                        Timber.d("Rec:%s", rec.toString());
-                        Timber.d("Record: %s", record.toString());
-                        Timber.d("File:" + file.getPath());
-                        Timber.d("--------------------------------------------------");
-                        File updateFile = new File(record.getPath());
-                        Uri fileUri = ProofModeUtils.INSTANCE.getUriForFile(updateFile, context, context.getPackageName());
-                        String proofExists = ProofModeUtils.INSTANCE.proofExistsForMedia(context, fileUri);
-                        if (proofExists == null || proofExists.isEmpty()) {
-                            //AndroidUtils.generateProofWithWorkManager(context, fileUri);
-                            view.generateProof(updateFile);
-                        }
 
 
                     }
@@ -401,6 +407,11 @@ public class MainPresenter implements MainContract.UserActionsListener {
             }
             audioPlayer.seek(0);
             appRecorder.stopRecording();
+        }
+        if (!deleteRecord) {
+            // Generate proof immediately you stop recording
+            //Timber.d("stopRecording: " + record.getPath());
+            //onGenerateProofInit();
         }
     }
 
@@ -632,6 +643,29 @@ public class MainPresenter implements MainContract.UserActionsListener {
     }
 
     @Override
+    public void onShareRecordProofClick() {
+        if (view != null && record != null) {
+            view.shareRecordProof(record);
+        }
+    }
+
+    @Override
+    public void onGenerateProof(Context context, Record record) {
+        Uri fileUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), context, context.getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+        Timber.d("onGenerateProof %s", fileUri.toString());
+        AndroidUtils.generateProofWithWorkManager(context, fileUri);
+
+        /*Uri uri = ProofModeUtils.INSTANCE.getUriForFile(, context, context.getApplicationContext().getPackageName());
+        Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uri.toString());
+        return new OneTimeWorkRequest.Builder(GenerateProofWorker.class)
+                .setInputData(data)
+                .setConstraints(new Constraints.Builder()
+                        .setRequiresStorageNotLow(true).build())
+                .build();*/
+
+    }
+
+    @Override
     public void onRenameRecordClick() {
         if (view != null && record != null) {
             view.askRecordingNewName(record.getId(), new File(record.getPath()), false);
@@ -755,8 +789,8 @@ public class MainPresenter implements MainContract.UserActionsListener {
         listenPlaybackProgress = true;
     }
 
-    @Override
-    public OneTimeWorkRequest generatedProof(File file, Context context) {
+    /*@Override
+    public OneTimeWorkRequest onGeneratedProof(File file, Context context) {
         Uri uri = ProofModeUtils.INSTANCE.getUriForFile(file, context, context.getApplicationContext().getPackageName());
         Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uri.toString());
         return new OneTimeWorkRequest.Builder(GenerateProofWorker.class)
@@ -764,7 +798,17 @@ public class MainPresenter implements MainContract.UserActionsListener {
                 .setConstraints(new Constraints.Builder()
                         .setRequiresStorageNotLow(true).build())
                 .build();
-    }
+    }*/
+
+    /*@Override
+    public File onMakeProofZip(File file, Context context) {
+        String mediaHash = ProofModeUtils.INSTANCE.proofExistsForMediaFile(context, file);
+        if (mediaHash != null) {
+            File proofDir = ProofModeUtils.INSTANCE.getProofDirectory(mediaHash, context);
+            return ProofModeUtils.INSTANCE.makeProofZip(proofDir, context);
+        }
+        return null;
+    }*/
 
     @Override
     public void importAudioFile(final Context context, final Uri uri) {

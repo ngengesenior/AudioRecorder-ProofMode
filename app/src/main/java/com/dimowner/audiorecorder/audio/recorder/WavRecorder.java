@@ -16,7 +16,8 @@
 
 package com.dimowner.audiorecorder.audio.recorder;
 
-import android.content.Context;
+import static com.dimowner.audiorecorder.AppConstants.RECORDING_VISUALIZATION_INTERVAL;
+
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -39,12 +40,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
 
-import static com.dimowner.audiorecorder.AppConstants.RECORDING_VISUALIZATION_INTERVAL;
-
 public class WavRecorder implements RecorderContract.Recorder {
 
     private static final int RECORDER_BPP = 16; //bits per sample
-    private final Context context;
     private final AtomicBoolean isRecording = new AtomicBoolean(false);
     private final AtomicBoolean isPaused = new AtomicBoolean(false);
     private final Handler handler = new Handler();
@@ -65,22 +63,11 @@ public class WavRecorder implements RecorderContract.Recorder {
 
     private RecorderContract.RecorderCallback recorderCallback;
 
-	/*private static class WavRecorderSingletonHolder {
-		private static final WavRecorder singleton = new WavRecorder();
+    private WavRecorder() {
+    }
 
-		public static WavRecorder getSingleton() {
-			return WavRecorderSingletonHolder.singleton;
-		}
-	}*/
-
-	/*public static WavRecorder getInstance() {
-		return WavRecorderSingletonHolder.getSingleton();
-	}*/
-
-    /*private WavRecorder() { }*/
-
-    public WavRecorder(Context context) {
-        this.context = context;
+    public static WavRecorder getInstance() {
+        return WavRecorderSingletonHolder.getSingleton();
     }
 
     @Override
@@ -354,5 +341,13 @@ public class WavRecorder implements RecorderContract.Recorder {
     private void pauseRecordingTimer() {
         handler.removeCallbacksAndMessages(null);
         updateTime = 0;
+    }
+
+    private static class WavRecorderSingletonHolder {
+        private static final WavRecorder singleton = new WavRecorder();
+
+        public static WavRecorder getSingleton() {
+            return WavRecorderSingletonHolder.singleton;
+        }
     }
 }

@@ -25,6 +25,7 @@ import android.os.Handler;
 
 import com.dimowner.audiorecorder.exception.InvalidOutputFile;
 import com.dimowner.audiorecorder.exception.RecorderInitException;
+import com.dimowner.audiorecorder.util.AndroidUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +35,6 @@ import timber.log.Timber;
 
 public class ThreeGpRecorder implements RecorderContract.Recorder {
 
-    private final Context context;
     private final AtomicBoolean isRecording = new AtomicBoolean(false);
     private final AtomicBoolean isPaused = new AtomicBoolean(false);
     private final Handler handler = new Handler();
@@ -44,24 +44,12 @@ public class ThreeGpRecorder implements RecorderContract.Recorder {
     private long durationMills = 0;
     private RecorderContract.RecorderCallback recorderCallback;
 
-	/*private static class RecorderSingletonHolder {
-		private static final ThreeGpRecorder singleton = new ThreeGpRecorder();
-
-		public static ThreeGpRecorder getSingleton() {
-			return RecorderSingletonHolder.singleton;
-		}
-	}*/
-
-	/*public static ThreeGpRecorder getInstance() {
-		return RecorderSingletonHolder.getSingleton();
-	}*/
-
-    /*private ThreeGpRecorder() { }*/
-
-    public ThreeGpRecorder(Context context) {
-        this.context = context;
+    private ThreeGpRecorder() {
     }
 
+    public static ThreeGpRecorder getInstance() {
+        return RecorderSingletonHolder.getSingleton();
+    }
 
     @Override
     public void setRecorderCallback(RecorderContract.RecorderCallback callback) {
@@ -210,5 +198,13 @@ public class ThreeGpRecorder implements RecorderContract.Recorder {
     @Override
     public boolean isPaused() {
         return isPaused.get();
+    }
+
+    private static class RecorderSingletonHolder {
+        private static final ThreeGpRecorder singleton = new ThreeGpRecorder();
+
+        public static ThreeGpRecorder getSingleton() {
+            return RecorderSingletonHolder.singleton;
+        }
     }
 }

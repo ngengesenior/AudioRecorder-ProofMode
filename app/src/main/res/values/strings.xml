@@ -101,6 +101,7 @@
     <string name="downloading_failed_file_already_exists">Failed to copy. File with name %s already exists</string>
     <string name="downloading_cancel">Copy canceled</string>
     <string name="share">Share</string>
+    <string name="share_proof">Share Proof</string>
     <string name="ask_to_rename">Show rename dialog after recording is completed</string>
     <string name="record_moved_into_trash">The record moved to trash</string>
     <string name="selected_records_moved_into_trash">Selected records moved to trash</string>
@@ -297,4 +298,6 @@
     <string name="settings_network">Network</string>
     <string name="settings_network_desc">Name of the network(s) you’re connected to</string>
     <string name="settings_notary">Notary</string>
+    <string name="proof_mode_data_associated_option">Enable the type of data to be added to generated proof</string>
+    <string name="enable">Enable</string>
 </resources>

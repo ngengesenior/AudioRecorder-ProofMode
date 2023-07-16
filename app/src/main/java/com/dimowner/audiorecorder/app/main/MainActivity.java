@@ -25,9 +25,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -72,6 +74,7 @@ import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.AnimationUtil;
 import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
+import com.proofmode.proofmodelib.utils.ProofModeUtils;
 
 import java.io.File;
 import java.util.List;
@@ -721,6 +724,25 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     }
 
     @Override
+    public void shareRecordProof(Record record) {
+        //Uri uri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()),getApplicationContext(),getApplicationContext().getPackageName());
+        //Uri uri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), getApplicationContext(), getApplicationContext().getPackageName());     //Uri.fromFile(new File(record.getPath()));
+        Uri uri = Uri.fromFile(new File(record.getPath()));
+
+        Timber.d("OnShareRecord %s", uri.toString());
+        String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), uri);
+        File file = ProofModeUtils.INSTANCE.getProofDirectory(hash, getApplicationContext());
+        File proofZip = ProofModeUtils.INSTANCE.makeProofZip(file, getApplicationContext());
+        ProofModeUtils.INSTANCE.shareZipFile(getApplicationContext(), proofZip, getApplicationContext().getPackageName());
+
+    }
+
+    @Override
+    public void generateProof(Context context, Record record) {
+
+    }
+
+    @Override
     public void openFile(Record record) {
         AndroidUtils.openAudioFile(getApplicationContext(), record.getPath(), record.getName());
     }
@@ -758,14 +780,12 @@ public class MainActivity extends Activity implements MainContract.View, View.On
         );
     }
 
-    @Override
+    /*@Override
     public void generateProof(File file) {
-        OneTimeWorkRequest workRequest = presenter.generatedProof(file, getApplicationContext());
-        WorkManager workManager = WorkManager.getInstance(getApplicationContext());
-        workManager.enqueueUniqueWork(file.getName(), ExistingWorkPolicy.REPLACE, workRequest);
         //return workManager.getWorkInfosForUniqueWorkLiveData(uri.toString());
+        AndroidUtils.generateProofWithWorkManager(getApplicationContext(), file);
 
-    }
+    }*/
 
     @Override
     public void onPlayProgress(final long mills, int percent) {
@@ -828,6 +848,8 @@ public class MainActivity extends Activity implements MainContract.View, View.On
                 );
             } else if (id == R.id.menu_delete) {
                 presenter.onDeleteClick();
+            } else if (id == R.id.menu_share_proof) {
+                presenter.onShareRecordProofClick();
             }
             return false;
         });
@@ -843,15 +865,12 @@ public class MainActivity extends Activity implements MainContract.View, View.On
         AndroidUtils.showRenameDialog(this, info.getName(), showCheckbox, newName -> {
             if (!info.getName().equalsIgnoreCase(newName)) {
                 presenter.renameRecord(recordId, newName, info.getFormat());
-
-
             }
         }, v -> {
         }, (buttonView, isChecked) -> {
             presenter.setAskToRename(!isChecked);
 
         });
-
     }
 
     private boolean checkStoragePermissionDownload() {
@@ -974,3 +993,11 @@ public class MainActivity extends Activity implements MainContract.View, View.On
         }
     }
 }
+
+/**
+ * /data/data/com.dimowner.audiorecorder.debug/files/f14a0a77eceddcb668147595e93793430e88eb8f3e8fe8e9d9000c0472b3ebae.zip
+ * /data/user/0/com.dimowner.audiorecorder.debug/files/proofmode/edec2f5d83ecf417b53d703314652d5d544b036c7ec18b66bd80f0452f198755
+ * URI:content://com.dimowner.audiorecorder.debug.app_file_provider/external_files/Music/records/Record-19.m4a
+ */
+
+

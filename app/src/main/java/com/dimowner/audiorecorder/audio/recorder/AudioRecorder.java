@@ -20,26 +20,11 @@ import static com.dimowner.audiorecorder.AppConstants.RECORDING_VISUALIZATION_IN
 
 import android.content.Context;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
-
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
-import androidx.work.Constraints;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.dimowner.audiorecorder.exception.InvalidOutputFile;
 import com.dimowner.audiorecorder.exception.RecorderInitException;
-import com.dimowner.audiorecorder.util.AndroidUtils;
-import com.proofmode.proofmodelib.utils.ProofModeUtils;
-import com.proofmode.proofmodelib.worker.GenerateProofWorker;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +34,6 @@ import timber.log.Timber;
 
 public class AudioRecorder implements RecorderContract.Recorder {
 
-    private final Context context;
     private final AtomicBoolean isRecording = new AtomicBoolean(false);
     private final AtomicBoolean isPaused = new AtomicBoolean(false);
     private final Handler handler = new Handler();
@@ -59,27 +43,12 @@ public class AudioRecorder implements RecorderContract.Recorder {
     private long durationMills = 0;
     private RecorderContract.RecorderCallback recorderCallback;
 
-	/*private static class RecorderSingletonHolder {
-		private static final AudioRecorder singleton = new AudioRecorder();
-
-		public static AudioRecorder getSingleton() {
-			return RecorderSingletonHolder.singleton;
-		}
-	}*/
-
-	/*public static AudioRecorder getInstance(Context context) {
-		return RecorderSingletonHolder.getSingleton();
-	}*/
-
-    /*private AudioRecorder() { }*/
-    public AudioRecorder(Context context) {
-        this.context = context;
+    private AudioRecorder() {
     }
 
-    public Context getContext() {
-        return context;
+    public static AudioRecorder getInstance() {
+        return RecorderSingletonHolder.getSingleton();
     }
-
 
     @Override
     public void setRecorderCallback(RecorderContract.RecorderCallback callback) {
@@ -195,25 +164,6 @@ public class AudioRecorder implements RecorderContract.Recorder {
         }
     }
 
-    private void generateProof(Uri uri, Context context) {
-        OneTimeWorkRequest.Builder requestBuilder = new OneTimeWorkRequest.Builder(GenerateProofWorker.class);
-        Constraints constraints = new Constraints.Builder()
-                .setRequiresStorageNotLow(true)
-                .build();
-        Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_HASH, uri);
-        requestBuilder.setConstraints(constraints)
-                .setInputData(data);
-        WorkManager workManager = WorkManager.getInstance(context);
-        workManager.beginUniqueWork(uri.toString(), ExistingWorkPolicy.REPLACE, requestBuilder.build()).enqueue();
-        workManager.getWorkInfosForUniqueWorkLiveData(uri.toString())
-                .observe((LifecycleOwner) context, workInfos -> {
-                    WorkInfo workInfo = workInfos.get(0);
-                    if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        Log.d("Data", "generateProof: success");
-                    }
-                });
-    }
-
     private void scheduleRecordingTimeUpdate() {
         handler.postDelayed(() -> {
             if (recorderCallback != null && recorder != null) {
@@ -248,5 +198,13 @@ public class AudioRecorder implements RecorderContract.Recorder {
     @Override
     public boolean isPaused() {
         return isPaused.get();
+    }
+
+    private static class RecorderSingletonHolder {
+        private static final AudioRecorder singleton = new AudioRecorder();
+
+        public static AudioRecorder getSingleton() {
+            return RecorderSingletonHolder.singleton;
+        }
     }
 }

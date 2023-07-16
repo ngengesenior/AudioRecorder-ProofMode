@@ -8,6 +8,10 @@
 			android:icon="@drawable/ic_share"
 			android:title="@string/share" />
 	<item
+		android:id="@+id/menu_share_proof"
+		android:icon="@drawable/ic_share"
+		android:title="Share Proof" />
+	<item
 			android:id="@+id/menu_info"
 			android:icon="@drawable/ic_info"
 			android:title="@string/info" />

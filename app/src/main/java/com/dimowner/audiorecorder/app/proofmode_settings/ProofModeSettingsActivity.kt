@@ -16,7 +16,12 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.dimowner.audiorecorder.databinding.ActivityProofmodeSettingsBinding
+import com.proofmode.proofmodelib.utils.ProofModeUtils.getLocationProofPref
+import com.proofmode.proofmodelib.utils.ProofModeUtils.getNetworkProofPref
+import com.proofmode.proofmodelib.utils.ProofModeUtils.getNotaryProofPref
+import com.proofmode.proofmodelib.utils.ProofModeUtils.getPhoneStateProofPref
 import com.proofmode.proofmodelib.utils.ProofModeUtils.saveLocationProofPref
 import com.proofmode.proofmodelib.utils.ProofModeUtils.saveNetworkProofPref
 import com.proofmode.proofmodelib.utils.ProofModeUtils.saveNotaryProofPref
@@ -45,7 +50,13 @@ class ProofModeSettingsActivity : AppCompatActivity() {
         initViews()
         initOnCheckedChangeListeners()
         initPermLaunchers()
+        setProofPointsOnInit()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setProofPointsOnInit()
     }
 
     private fun initViews() {
@@ -54,6 +65,30 @@ class ProofModeSettingsActivity : AppCompatActivity() {
         switchDevice = binding.switchDevice
         switchNotarize = binding.switchNotarize
     }
+
+    private fun setProofPointsOnInit() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_PHONE_STATE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            switchDevice.isChecked = prefs.getPhoneStateProofPref()
+        }
+
+        if (anyLocationPermissionAccepted()) {
+            switchLocation.isChecked = prefs.getLocationProofPref()
+        }
+
+        switchNetwork.isChecked = prefs.getNetworkProofPref()
+
+        switchNotarize.isChecked = prefs.getNotaryProofPref()
+    }
+
+    private fun anyLocationPermissionAccepted() =
+        locationPermissions.any {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+
 
     private fun openAppSettings() {
         val intent = Intent().apply {
@@ -105,7 +140,7 @@ class ProofModeSettingsActivity : AppCompatActivity() {
                 ) {
                     createDialogAndLaunch(message = "Phone state is used to save certain phone info with proof data",
                         onOkClick = {
-                            networkPermLauncher.launch(Manifest.permission.READ_PHONE_STATE)
+                            phonePermLauncher.launch(Manifest.permission.READ_PHONE_STATE)
                         }, onCancelClick = {
                             prefs.savePhoneStateProofPref(false)
                             switchDevice.isChecked = false
@@ -134,7 +169,6 @@ class ProofModeSettingsActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permResults ->
                 if (permResults.values.any { it }) {
                     prefs.saveLocationProofPref(true)
-
                 } else {
                     if (locationPermissions.any {
                             ActivityCompat.shouldShowRequestPermissionRationale(this, it)
@@ -155,7 +189,7 @@ class ProofModeSettingsActivity : AppCompatActivity() {
                                 openAppSettings()
                             }, onCancelClick = {
                                 switchLocation.isChecked = false
-                                prefs.saveLocationProofPref(false)
+                                //prefs.saveLocationProofPref(false)
                             })
 
                     }

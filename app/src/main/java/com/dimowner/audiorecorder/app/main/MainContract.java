@@ -20,7 +20,6 @@ import android.content.Context;
 import android.net.Uri;
 
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkRequest;
 
 import com.dimowner.audiorecorder.Contract;
 import com.dimowner.audiorecorder.IntArrayList;
@@ -101,13 +100,17 @@ public interface MainContract {
 
         void shareRecord(Record record);
 
+        void shareRecordProof(Record record);
+
+        void generateProof(Context context, Record record);
+
         void openFile(Record record);
 
         void downloadRecord(Record record);
 
         void showMigratePublicStorageWarning();
 
-        void generateProof(File file);
+
     }
 
     interface UserActionsListener extends Contract.UserActionsListener<MainContract.View> {
@@ -148,6 +151,11 @@ public interface MainContract {
 
         void onShareRecordClick();
 
+        // on ShareRecordProof
+        void onShareRecordProofClick();
+
+        void onGenerateProof(Context context, Record record);
+
         void onRenameRecordClick();
 
         void onOpenFileClick();
@@ -169,6 +177,9 @@ public interface MainContract {
 
         void enablePlaybackProgressListener();
 
-        OneTimeWorkRequest generatedProof(File file, Context context);
+        //OneTimeWorkRequest onGeneratedProof(File file, Context context);
+
+        /*File onMakeProofZip(File file, Context context);*/
+
     }
 }
