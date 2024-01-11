@@ -101,6 +101,7 @@ public interface MainContract {
         void shareRecord(Record record);
 
         void shareRecordProof(Record record);
+        void shareRecordC2pa(Record record);
 
         void generateProof(Context context, Record record);
 
@@ -153,6 +154,7 @@ public interface MainContract {
 
         // on ShareRecordProof
         void onShareRecordProofClick();
+        void onShareC2paClick();
 
         void onGenerateProof(Context context, Record record);
 

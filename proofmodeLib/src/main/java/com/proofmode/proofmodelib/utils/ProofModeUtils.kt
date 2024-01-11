@@ -1,22 +1,31 @@
 package com.proofmode.proofmodelib.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import androidx.work.Data
+import org.bouncycastle.openpgp.PGPException
+import org.bouncycastle.openpgp.PGPPublicKey
 import org.witness.proofmode.ProofMode
 import org.witness.proofmode.crypto.HashUtils
+import org.witness.proofmode.crypto.pgp.PgpUtils
 import org.witness.proofmode.service.MediaWatcher
 import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.random.Random
 
 object ProofModeUtils {
 
@@ -162,7 +171,6 @@ object ProofModeUtils {
             //hashCache[sMediaUri] = hash
             Timber.d("Proof check if exists for URI %s and hash %s", mediaUri, hash)
             val fileFolder = MediaWatcher.getHashStorageDir(context.applicationContext, hash)
-            Timber.d("File folder:" + fileFolder.toString())
 
             return if (fileFolder != null) {
                 val fileMediaProof = File(fileFolder, hash + ProofMode.PROOF_FILE_TAG)
@@ -175,6 +183,23 @@ object ProofModeUtils {
 
     fun getProofDirectory(hash: String, context: Context): File {
         return ProofMode.getProofDir(context, hash)
+    }
+
+    fun getPublicKeyFingerprint(context: Context):String {
+        return PgpUtils.getInstance(context.applicationContext).publicKeyFingerprint
+
+    }
+
+    fun publishPublicKey(context: Context) {
+        try {
+            PgpUtils.getInstance(context).publishPublicKey()
+        } catch (ex:Exception) {
+
+        }
+    }
+
+    fun getPublicKey(context: Context):String {
+        return PgpUtils.getInstance(context.applicationContext).publicKeyString
     }
 
 }

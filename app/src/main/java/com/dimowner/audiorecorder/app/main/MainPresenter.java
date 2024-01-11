@@ -21,11 +21,15 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
 
 import com.dimowner.audiorecorder.ARApplication;
 import com.dimowner.audiorecorder.AppConstants;
@@ -47,6 +51,7 @@ import com.dimowner.audiorecorder.exception.AppException;
 import com.dimowner.audiorecorder.exception.CantCreateFileException;
 import com.dimowner.audiorecorder.exception.ErrorParser;
 import com.dimowner.audiorecorder.util.AndroidUtils;
+import com.dimowner.audiorecorder.util.C2paUtils;
 import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
 import com.proofmode.proofmodelib.utils.ProofModeUtils;
@@ -650,18 +655,17 @@ public class MainPresenter implements MainContract.UserActionsListener {
     }
 
     @Override
-    public void onGenerateProof(Context context, Record record) {
-        Uri fileUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), context, context.getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
-        Timber.d("onGenerateProof %s", fileUri.toString());
-        AndroidUtils.generateProofWithWorkManager(context, fileUri);
+    public void onShareC2paClick() {
+        if (view != null && record != null) {
+            view.shareRecordC2pa(record);
+        }
+    }
 
-        /*Uri uri = ProofModeUtils.INSTANCE.getUriForFile(, context, context.getApplicationContext().getPackageName());
-        Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uri.toString());
-        return new OneTimeWorkRequest.Builder(GenerateProofWorker.class)
-                .setInputData(data)
-                .setConstraints(new Constraints.Builder()
-                        .setRequiresStorageNotLow(true).build())
-                .build();*/
+
+    @Override
+    public void onGenerateProof(Context context, Record record) {
+        Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), context, context.getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+        AndroidUtils.generateProofWithWorkManager(context, contentUri);
 
     }
 

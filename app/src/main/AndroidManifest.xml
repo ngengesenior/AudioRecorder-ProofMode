@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.dimowner.audiorecorder">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -38,6 +39,7 @@
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="true" />
+    <uses-sdk tools:overrideLibrary="info.guardianproject.simple_c2pa" />
 
     <application
         android:name=".ARApplication"

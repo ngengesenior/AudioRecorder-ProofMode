@@ -16,6 +16,7 @@
 
 package com.dimowner.audiorecorder.util;
 
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,19 +36,6 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.net.Uri;
-
-import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LiveData;
-import androidx.work.Constraints;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-
 import android.os.Build;
 import android.text.Editable;
 import android.text.Spannable;
@@ -72,6 +60,17 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.lifecycle.LiveData;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
 import com.dimowner.audiorecorder.ARApplication;
 import com.dimowner.audiorecorder.AppConstants;
 import com.dimowner.audiorecorder.Mapper;
@@ -91,6 +90,7 @@ import java.util.List;
 
 import timber.log.Timber;
 
+
 /**
  * Android related utilities methods.
  */
@@ -99,6 +99,8 @@ public class AndroidUtils {
     //Prevent object instantiation
     private AndroidUtils() {
     }
+
+
 
     /**
      * Convert density independent pixels value (dip) into pixels value (px).
@@ -124,7 +126,8 @@ public class AndroidUtils {
     }
 
     public static LiveData<List<WorkInfo>> generateProofWithWorkManager(Context context, Uri uri) {
-        Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uri.toString());
+        String uriString = uri.toString();
+        Data data = ProofModeUtils.INSTANCE.createData(ProofModeUtils.MEDIA_KEY, uriString);
         OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(GenerateProofWorker.class)
                 .setInputData(data)
                 .setConstraints(new Constraints.Builder()
@@ -132,7 +135,7 @@ public class AndroidUtils {
                 .build();
         WorkManager workManager = WorkManager.getInstance(context);
         workManager.enqueueUniqueWork(uri.toString(), ExistingWorkPolicy.REPLACE, workRequest);
-        return workManager.getWorkInfosForUniqueWorkLiveData(uri.toString());
+        return workManager.getWorkInfosForUniqueWorkLiveData(uriString);
     }
 
     /**

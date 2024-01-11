@@ -17,6 +17,7 @@ class GenerateProofWorker(
     override fun doWork(): Result {
         val audioUriString = inputData.getString(ProofModeUtils.MEDIA_KEY)
         val audioUri = Uri.parse(audioUriString)
+        Timber.d("Worker uri path ${audioUri.path}")
         val existingHash = ProofModeUtils.proofExistsForMedia(context, audioUri)
         if (existingHash.isNullOrEmpty()) {
             val hash: String? = ProofMode.generateProof(context, Uri.parse(audioUriString))

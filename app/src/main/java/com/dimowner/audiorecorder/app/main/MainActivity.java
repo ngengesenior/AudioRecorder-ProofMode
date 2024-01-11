@@ -43,6 +43,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -72,6 +73,7 @@ import com.dimowner.audiorecorder.exception.CantCreateFileException;
 import com.dimowner.audiorecorder.exception.ErrorParser;
 import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.AnimationUtil;
+import com.dimowner.audiorecorder.util.C2paUtils;
 import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
 import com.proofmode.proofmodelib.utils.ProofModeUtils;
@@ -725,15 +727,38 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 
     @Override
     public void shareRecordProof(Record record) {
-        //Uri uri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()),getApplicationContext(),getApplicationContext().getPackageName());
-        //Uri uri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), getApplicationContext(), getApplicationContext().getPackageName());     //Uri.fromFile(new File(record.getPath()));
-        Uri uri = Uri.fromFile(new File(record.getPath()));
 
-        Timber.d("OnShareRecord %s", uri.toString());
-        String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), uri);
+        //Timber.d("The uri scheme is %s", uri.getScheme());
+        Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+        String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
         File file = ProofModeUtils.INSTANCE.getProofDirectory(hash, getApplicationContext());
         File proofZip = ProofModeUtils.INSTANCE.makeProofZip(file, getApplicationContext());
         ProofModeUtils.INSTANCE.shareZipFile(getApplicationContext(), proofZip, getApplicationContext().getPackageName());
+
+    }
+    @Override
+    public void shareRecordC2pa(Record record) {
+        Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+        String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
+        if (hash != null) {
+            try {
+                File dir = ProofModeUtils.INSTANCE.getProofDirectory(hash,getApplicationContext());
+                File file = C2paUtils.Companion.generateContentCredentials(this,record.getPath(),true,false,dir);
+                String authority = getApplicationContext().getPackageName() + ".app_file_provider";
+                Uri uri = FileProvider.getUriForFile(getApplicationContext(), authority, file);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                shareIntent.setType("audio/*");
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Intent chooserIntent = Intent.createChooser(shareIntent, "C2pa file");
+                chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(chooserIntent);
+            } catch (Exception ex) {
+                Timber.e("Error sharing file:%s", ex.getMessage());
+            }
+        } else  {
+            Timber.d("Hash not yet set");
+        }
 
     }
 
@@ -850,6 +875,8 @@ public class MainActivity extends Activity implements MainContract.View, View.On
                 presenter.onDeleteClick();
             } else if (id == R.id.menu_share_proof) {
                 presenter.onShareRecordProofClick();
+            } else if(id == R.id.menu_share_c2pa ) {
+                presenter.onShareC2paClick();
             }
             return false;
         });

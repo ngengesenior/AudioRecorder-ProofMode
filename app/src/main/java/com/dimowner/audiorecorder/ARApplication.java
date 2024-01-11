@@ -23,12 +23,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
 import com.dimowner.audiorecorder.audio.player.PlayerContractNew;
 import com.dimowner.audiorecorder.data.Prefs;
 import com.dimowner.audiorecorder.util.AndroidUtils;
+import com.dimowner.audiorecorder.util.C2paUtils;
+import com.proofmode.proofmodelib.utils.ProofModeUtils;
 //import com.google.firebase.FirebaseApp;
 
 import timber.log.Timber;
@@ -67,6 +71,19 @@ public class ARApplication extends Application {
 		}
 	}
 
+	private void setC2paIdentity() {
+		String keyFingerPrint = ProofModeUtils.INSTANCE.getPublicKeyFingerprint(this);
+		String key = "0x" + keyFingerPrint;
+		String email = "info@proofmode.org";
+		String display = email.replace("@","at");
+		String uri =
+				"https://keys.openpgp.org/search?q=" + keyFingerPrint;
+		C2paUtils.Companion.setC2PAIdentity(display,uri,email,key);
+		if (key != null || !key.isEmpty()){
+			ProofModeUtils.INSTANCE.publishPublicKey(this);
+		}
+	}
+
 	public static int getLongWaveformSampleCount() {
 		return (int)(AppConstants.WAVEFORM_WIDTH * screenWidthDp);
 	}
@@ -83,7 +100,15 @@ public class ARApplication extends Application {
 			});
 		}
 		super.onCreate();
+		try {
+			Os.setenv("TMPDIR",getCacheDir().getAbsolutePath(), true);
+		} catch (ErrnoException e) {
+			Timber.d("The temp dir was not set");
+		}
 
+
+		// Generate C2pa credentials
+		setC2paIdentity();
 		PACKAGE_NAME = getApplicationContext().getPackageName();
 		applicationHandler = new Handler(getApplicationContext().getMainLooper());
 		screenWidthDp = AndroidUtils.pxToDp(AndroidUtils.getScreenWidth(getApplicationContext()));
