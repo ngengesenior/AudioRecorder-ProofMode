@@ -35,6 +35,7 @@ object ProofModeUtils {
     private const val DOCUMENT_AUDIO =
             "content://com.android.providers.media.documents/document/audio%3A"
     private const val MEDIA_AUDIO = "content://media/external/audio/media/"
+    const val defaultPassphrase = "12345678"
 
     fun makeProofZip(proofDirPath: File, context: Context): File {
         val outputZipFile = File(context.filesDir, proofDirPath.name + ".zip")
@@ -50,7 +51,7 @@ object ProofModeUtils {
             }
             val keyEntry = ZipEntry("pubkey.asc");
             zos.putNextEntry(keyEntry);
-            val publicKey = ProofMode.getPublicKeyString(context)
+            val publicKey = ProofMode.getPublicKeyString(context, defaultPassphrase)
             zos.write(publicKey.toByteArray())
 
         }
@@ -186,20 +187,17 @@ object ProofModeUtils {
     }
 
     fun getPublicKeyFingerprint(context: Context):String {
-        return PgpUtils.getInstance(context.applicationContext).publicKeyFingerprint
+        return PgpUtils.getInstance(context.applicationContext, defaultPassphrase).publicKeyFingerprint
 
     }
 
     fun publishPublicKey(context: Context) {
         try {
-            PgpUtils.getInstance(context).publishPublicKey()
+            PgpUtils.getInstance(context, defaultPassphrase).publishPublicKey()
         } catch (ex:Exception) {
 
         }
     }
 
-    fun getPublicKey(context: Context):String {
-        return PgpUtils.getInstance(context.applicationContext).publicKeyString
-    }
 
 }

@@ -57,22 +57,19 @@ class C2paUtils {
 
 
 
-        fun generateContentCredentials(_context: Context,
+        fun generateContentCredentials(context: Context,
                                        inputAudioFilePath:String,
                                        isDirectCapture: Boolean = true,
                                        allowMachineLearning: Boolean=false,
-                                       fileOutDir: File):File {
+                                       fileOutDir: File? = null):File {
             val fileMedia = File(inputAudioFilePath)
-            var fileOut = fileMedia
-            var fileName = fileMedia.name
-            if (isDirectCapture) {
-                fileName = "c2pa-$fileName"
-                fileOut = File(fileOutDir,fileName)
-            }
 
+            /**
+             * Let us just add the content credentials to the file and not create a new one
+             */
             if (fileMedia.exists()) {
                 addContentCredentials(
-                    _context,
+                    context,
                     _identityEmail,
                     _identityKey,
                     _identityName,
@@ -80,11 +77,11 @@ class C2paUtils {
                     isDirectCapture,
                     allowMachineLearning,
                     fileMedia,
-                    fileOut
+                    fileMedia
                 )
 
             }
-            return fileOut
+            return fileMedia
 
         }
 

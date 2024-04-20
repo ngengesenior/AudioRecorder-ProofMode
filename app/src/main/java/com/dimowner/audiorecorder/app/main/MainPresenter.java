@@ -59,6 +59,7 @@ import com.proofmode.proofmodelib.utils.ProofModeUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
 
@@ -83,6 +84,7 @@ public class MainPresenter implements MainContract.UserActionsListener {
     private Record record;
     private boolean deleteRecord = false;
     private boolean listenPlaybackProgress = true;
+    private final WeakReference<Context> contextRef;
 
     /**
      * Flag true defines that presenter called to show import progress when view was not bind.
@@ -98,7 +100,8 @@ public class MainPresenter implements MainContract.UserActionsListener {
                          final BackgroundQueue loadingTasks,
                          final BackgroundQueue processingTasks,
                          final BackgroundQueue importTasks,
-                         SettingsMapper settingsMapper) {
+                         SettingsMapper settingsMapper,
+                         Context context) {
         this.prefs = prefs;
         this.fileRepository = fileRepository;
         this.localRepository = localRepository;
@@ -109,6 +112,7 @@ public class MainPresenter implements MainContract.UserActionsListener {
         this.audioPlayer = audioPlayer;
         this.appRecorder = appRecorder;
         this.settingsMapper = settingsMapper;
+        this.contextRef = new WeakReference<>(context.getApplicationContext());
     }
 
     @Override
@@ -182,27 +186,11 @@ public class MainPresenter implements MainContract.UserActionsListener {
                         }
                         record = rec;
                         //Uri fileUri = Uri.fromFile(new File(record.getPath()));
-                        onGenerateProof(ARApplication.injector.getContext(), record);
+
+                        // C2pa generation
                         //Timber.d("onRecordingStopped: %s", fileUri.toString());
                         songDuration = rec.getDuration();
 
-
-                        /**
-                         * Generate proof here
-                         */
-                        Context context = ARApplication.injector.getContext();
-                        Timber.d("---------------------------------------------------");
-                        Timber.d("Getting Record info");
-                        Timber.d("Rec:%s", rec.toString());
-                        Timber.d("Record: %s", record.toString());
-                        Timber.d("--------------------------------------------------");
-                        /*//File updateFile = new File(record.getPath());
-                        //Uri fileUri = ProofModeUtils.INSTANCE.getUriForFile(updateFile, context, context.getPackageName());
-                        String proofExists = ProofModeUtils.INSTANCE.proofExistsForMedia(context, fileUri);
-                        if (proofExists == null || proofExists.isEmpty()) {
-                            //AndroidUtils.generateProofWithWorkManager(context, fileUri);
-                            //view.generateProof(updateFile);
-                        }*/
                         if (view != null) {
                             view.showWaveForm(rec.getAmps(), songDuration, 0);
                             view.showName(rec.getName());
@@ -211,14 +199,40 @@ public class MainPresenter implements MainContract.UserActionsListener {
                         }
                         updateInformation(rec.getFormat(), rec.getSampleRate(), rec.getSize());
                         //TODO: I am sure we have to generate proof here after updating the info
-
-
+                        onGenerateProof(contextRef.get().getApplicationContext(), record);
+                        generateContentCredentials(record);
                     }
                     if (view != null) {
                         view.keepScreenOn(false);
                         view.hideProgress();
                         view.showRecordingStop();
                     }
+                }
+
+                public void generateContentCredentials(Record record) {
+                    /*Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(
+                            new File(record.getPath()),
+                            contextRef.get().getApplicationContext(),
+                            contextRef.get().getPackageName()
+                    );*/ //Uri.fromFile(new File(record.getPath()));
+                    Context appCtx = contextRef.get().getApplicationContext();
+                    C2paUtils.Companion.generateContentCredentials(
+                            appCtx,
+                            record.getPath(),
+                            true,
+                            false, null);
+                    /*if (hash != null && !hash.isEmpty()) {
+
+                        Timber.d("generateContentCredentials: $hash");
+                        //File outputDir = ProofModeUtils.INSTANCE.getProofDirectory(hash,appCtx);
+                        C2paUtils.Companion.generateContentCredentials(
+                                appCtx,
+                                record.getPath(),
+                                true,
+                                false, null);
+                    } else  {
+                        Timber.d("Hash is null I do not know why");
+                    }*/
                 }
 
                 @Override

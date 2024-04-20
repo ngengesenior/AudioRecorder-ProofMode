@@ -79,9 +79,6 @@ public class ARApplication extends Application {
 		String uri =
 				"https://keys.openpgp.org/search?q=" + keyFingerPrint;
 		C2paUtils.Companion.setC2PAIdentity(display,uri,email,key);
-		if (key != null || !key.isEmpty()){
-			ProofModeUtils.INSTANCE.publishPublicKey(this);
-		}
 	}
 
 	public static int getLongWaveformSampleCount() {

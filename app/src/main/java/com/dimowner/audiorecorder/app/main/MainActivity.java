@@ -731,6 +731,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
         //Timber.d("The uri scheme is %s", uri.getScheme());
         Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
         String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
+
         File file = ProofModeUtils.INSTANCE.getProofDirectory(hash, getApplicationContext());
         File proofZip = ProofModeUtils.INSTANCE.makeProofZip(file, getApplicationContext());
         ProofModeUtils.INSTANCE.shareZipFile(getApplicationContext(), proofZip, getApplicationContext().getPackageName());
@@ -739,7 +740,8 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     @Override
     public void shareRecordC2pa(Record record) {
         Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
-        String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
+        AndroidUtils.shareAudioFile(getApplicationContext(),record.getPath(),record.getName(),"*");
+       /* String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
         if (hash != null) {
             try {
                 File dir = ProofModeUtils.INSTANCE.getProofDirectory(hash,getApplicationContext());
@@ -758,7 +760,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
             }
         } else  {
             Timber.d("Hash not yet set");
-        }
+        }*/
 
     }
 

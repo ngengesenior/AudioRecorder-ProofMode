@@ -179,7 +179,7 @@ public class Injector {
             mainPresenter = new MainPresenter(providePrefs(), provideFileRepository(),
                     provideLocalRepository(), provideAudioPlayer(), provideAppRecorder(),
                     provideRecordingTasksQueue(), provideLoadingTasksQueue(), provideProcessingTasksQueue(),
-                    provideImportTasksQueue(), provideSettingsMapper());
+                    provideImportTasksQueue(), provideSettingsMapper(),context);
         }
         return mainPresenter;
     }
@@ -316,7 +316,5 @@ public class Injector {
         recordingTasks.close();
     }
 
-    public Context getContext() {
-        return context;
-    }
+
 }
