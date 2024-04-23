@@ -10,11 +10,15 @@ import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import androidx.work.Data
+import com.proofmode.proofmodelib.BuildConfig
+import com.proofmode.proofmodelib.notaries.GoogleSafetyNetNotarizationProvider
+import com.proofmode.proofmodelib.notaries.SafetyNetCheck
 import org.bouncycastle.openpgp.PGPException
 import org.bouncycastle.openpgp.PGPPublicKey
 import org.witness.proofmode.ProofMode
 import org.witness.proofmode.crypto.HashUtils
 import org.witness.proofmode.crypto.pgp.PgpUtils
+import org.witness.proofmode.notaries.OpenTimestampsNotarizationProvider
 import org.witness.proofmode.service.MediaWatcher
 import timber.log.Timber
 import java.io.BufferedOutputStream
@@ -38,7 +42,7 @@ object ProofModeUtils {
     const val defaultPassphrase = "12345678"
 
     fun makeProofZip(proofDirPath: File, context: Context): File {
-        val outputZipFile = File(context.filesDir, proofDirPath.name + ".zip")
+        val outputZipFile = File(context.filesDir, "proofmode-audio-recorder${proofDirPath.name}.zip")
         ZipOutputStream(BufferedOutputStream(FileOutputStream(outputZipFile))).use { zos ->
             proofDirPath.walkTopDown().forEach { file ->
                 val zipFileName =
@@ -107,6 +111,25 @@ object ProofModeUtils {
                 file
         )
     }
+
+    fun addDefaultNotarizationProviders(context: Context) {
+        SafetyNetCheck.setApiKey(BuildConfig.SAFETY_CHECK_KEY)
+        try {
+            ProofMode.addNotarizationProvider(context,GoogleSafetyNetNotarizationProvider(context))
+        }catch (ex:Exception) {
+            Timber.e(ex)
+            Timber.e("GoogleSafetyNetNotarizationProvider failed")
+        }
+        try {
+            ProofMode.addNotarizationProvider(context,OpenTimestampsNotarizationProvider())
+        }catch (ex:Exception) {
+            Timber.e(ex)
+            Timber.e("OpenTimestampsNotarizationProvider failed")
+        }
+
+
+    }
+
 
 
     fun retrieveOrCreateHash(uriMedia: Uri, context: Context): String {

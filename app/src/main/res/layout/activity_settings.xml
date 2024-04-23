@@ -109,8 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="@dimen/spacing_xsmall"
-                android:src="@drawable/outline_arrow_forward"
-                app:tint="@color/md_yellow_800F" />
+                android:src="@drawable/outline_arrow_forward" />
 
 
         </LinearLayout>

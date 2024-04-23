@@ -1,0 +1,115 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.eternitywall.test" >
+4
+5    <uses-sdk
+5-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:5:5-74
+6        android:minSdkVersion="24"
+6-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:5:15-41
+7        android:targetSdkVersion="34" />
+7-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:5:42-71
+8
+9    <instrumentation
+9-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:11:5-15:71
+10        android:name="androidx.test.runner.AndroidJUnitRunner"
+10-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:11:22-76
+11        android:functionalTest="false"
+11-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:14:22-52
+12        android:handleProfiling="false"
+12-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:13:22-53
+13        android:label="Tests for com.eternitywall.test"
+13-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:15:22-69
+14        android:targetPackage="com.eternitywall.test" />
+14-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:12:22-67
+15
+16    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+16-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:8:5-10:48
+16-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:9:9-64
+17    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+17-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:11:5-13:48
+17-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:12:9-65
+18    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+18-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:14:5-16:48
+18-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:15:9-63
+19    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+19-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:17:5-19:48
+19-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:18:9-63
+20    <uses-permission android:name="android.permission.INTERNET" />
+20-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:20:5-22:48
+20-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:21:9-51
+21    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+21-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:23:5-25:48
+21-->[:android-opentimestamps] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/merged_manifest/debug/AndroidManifest.xml:24:9-59
+22    <!--
+23     Required only if your app needs to access images or photos
+24     that other apps created.
+25    -->
+26    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+26-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:31:5-76
+26-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:31:22-73
+27    <!--
+28         Required only if your app needs to access videos
+29         that other apps created.
+30    -->
+31    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+31-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:37:5-75
+31-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:37:22-72
+32    <!--
+33         Required only if your app needs to access audio files
+34         that other apps created.
+35    -->
+36    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+36-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:43:5-75
+36-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:43:22-72
+37    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+37-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:44:5-80
+37-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:44:22-77
+38    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+38-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:45:5-81
+38-->[:android-libproofmode] /Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-libproofmode/build/intermediates/merged_manifest/debug/AndroidManifest.xml:45:22-78
+39
+40    <permission
+40-->[androidx.core:core:1.12.0] /Users/admin/.gradle/caches/transforms-3/26549e40952f1be7958bf36fcebd0fee/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+41        android:name="com.eternitywall.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+41-->[androidx.core:core:1.12.0] /Users/admin/.gradle/caches/transforms-3/26549e40952f1be7958bf36fcebd0fee/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+42        android:protectionLevel="signature" />
+42-->[androidx.core:core:1.12.0] /Users/admin/.gradle/caches/transforms-3/26549e40952f1be7958bf36fcebd0fee/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+43
+44    <uses-permission android:name="com.eternitywall.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+44-->[androidx.core:core:1.12.0] /Users/admin/.gradle/caches/transforms-3/26549e40952f1be7958bf36fcebd0fee/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+44-->[androidx.core:core:1.12.0] /Users/admin/.gradle/caches/transforms-3/26549e40952f1be7958bf36fcebd0fee/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+45
+46    <application
+46-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:7:5-9:19
+47        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+47-->[androidx.core:core:1.12.0] /Users/admin/.gradle/caches/transforms-3/26549e40952f1be7958bf36fcebd0fee/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+48        android:debuggable="true"
+49        android:extractNativeLibs="false" >
+50        <uses-library android:name="android.test.runner" />
+50-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:8:9-60
+50-->/Users/admin/AndroidStudioProjects/AudioRecorder-ProofMode/android-opentimestamps/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest16397637100798054957.xml:8:23-57
+51
+52        <provider
+52-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+53            android:name="androidx.startup.InitializationProvider"
+53-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+54            android:authorities="com.eternitywall.test.androidx-startup"
+54-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+55            android:exported="false" >
+55-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+56            <meta-data
+56-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+57                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+57-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+58                android:value="androidx.startup" />
+58-->[androidx.emoji2:emoji2:1.2.0] /Users/admin/.gradle/caches/transforms-3/b03d64e4a6342548dc3f59ed9e45c0d0/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+59            <meta-data
+59-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/admin/.gradle/caches/transforms-3/d2c494889182cf9805a026d8e10f5082/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+60                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+60-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/admin/.gradle/caches/transforms-3/d2c494889182cf9805a026d8e10f5082/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+61                android:value="androidx.startup" />
+61-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/admin/.gradle/caches/transforms-3/d2c494889182cf9805a026d8e10f5082/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+62        </provider>
+63    </application>
+64
+65</manifest>

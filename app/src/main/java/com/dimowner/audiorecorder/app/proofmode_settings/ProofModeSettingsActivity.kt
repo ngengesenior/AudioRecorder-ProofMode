@@ -103,6 +103,7 @@ class ProofModeSettingsActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
                 if (it) {
                     prefs.saveNetworkProofPref(it)
+                    switchNetwork.isChecked = it
                 } else {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(
                             this,
@@ -132,6 +133,7 @@ class ProofModeSettingsActivity : AppCompatActivity() {
         phonePermLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
                 prefs.savePhoneStateProofPref(it)
+                switchDevice.isChecked = it
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(
                         this,
@@ -169,6 +171,7 @@ class ProofModeSettingsActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permResults ->
                 if (permResults.values.any { it }) {
                     prefs.saveLocationProofPref(true)
+                    switchLocation.isChecked = true
                 } else {
                     if (locationPermissions.any {
                             ActivityCompat.shouldShowRequestPermissionRationale(this, it)
@@ -228,6 +231,8 @@ class ProofModeSettingsActivity : AppCompatActivity() {
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     networkPermLauncher.launch(Manifest.permission.ACCESS_NETWORK_STATE)
+                } else {
+                    prefs.saveNetworkProofPref(true)
                 }
 
             } else {
@@ -246,6 +251,8 @@ class ProofModeSettingsActivity : AppCompatActivity() {
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     phonePermLauncher.launch(Manifest.permission.READ_PHONE_STATE)
+                } else{
+                    prefs.savePhoneStateProofPref(true)
                 }
             } else {
                 prefs.savePhoneStateProofPref(false)
@@ -261,17 +268,12 @@ class ProofModeSettingsActivity : AppCompatActivity() {
             if (!isChecked) {
                 prefs.saveLocationProofPref(false)
             } else {
-                if (locationPermissions.any {
-                        ActivityCompat.checkSelfPermission(
-                            this,
-                            it
-                        ) != PackageManager.PERMISSION_GRANTED
-
-                    }) {
-                    locationPermLauncher.launch(locationPermissions)
+                if(anyLocationPermissionAccepted()) {
+                    prefs.saveLocationProofPref(true)
 
                 } else {
-                    prefs.saveLocationProofPref(false)
+
+                    locationPermLauncher.launch(locationPermissions)
                 }
             }
 

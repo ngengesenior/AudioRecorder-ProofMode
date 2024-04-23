@@ -106,6 +106,8 @@ public class ARApplication extends Application {
 
 		// Generate C2pa credentials
 		setC2paIdentity();
+		// Add notarization providers
+		ProofModeUtils.INSTANCE.addDefaultNotarizationProviders(this);
 		PACKAGE_NAME = getApplicationContext().getPackageName();
 		applicationHandler = new Handler(getApplicationContext().getMainLooper());
 		screenWidthDp = AndroidUtils.pxToDp(AndroidUtils.getScreenWidth(getApplicationContext()));
