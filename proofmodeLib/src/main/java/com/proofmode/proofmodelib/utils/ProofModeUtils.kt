@@ -17,7 +17,6 @@ import org.bouncycastle.openpgp.PGPException
 import org.bouncycastle.openpgp.PGPPublicKey
 import org.witness.proofmode.ProofMode
 import org.witness.proofmode.crypto.HashUtils
-import org.witness.proofmode.crypto.pgp.PgpUtils
 import org.witness.proofmode.notaries.OpenTimestampsNotarizationProvider
 import org.witness.proofmode.service.MediaWatcher
 import timber.log.Timber
@@ -39,7 +38,7 @@ object ProofModeUtils {
     private const val DOCUMENT_AUDIO =
             "content://com.android.providers.media.documents/document/audio%3A"
     private const val MEDIA_AUDIO = "content://media/external/audio/media/"
-    const val defaultPassphrase = "12345678"
+    const val defaultPassphrase = "00000000"
 
     fun makeProofZip(proofDirPath: File, context: Context): File {
         val outputZipFile = File(context.filesDir, "proofmode-audio-recorder${proofDirPath.name}.zip")
@@ -55,7 +54,7 @@ object ProofModeUtils {
             }
             val keyEntry = ZipEntry("pubkey.asc");
             zos.putNextEntry(keyEntry);
-            val publicKey = ProofMode.getPublicKeyString(context, defaultPassphrase)
+            val publicKey = getPublicKeyFingerprint(context.applicationContext)
             zos.write(publicKey.toByteArray())
 
         }
@@ -210,16 +209,7 @@ object ProofModeUtils {
     }
 
     fun getPublicKeyFingerprint(context: Context):String {
-        return PgpUtils.getInstance(context.applicationContext, defaultPassphrase).publicKeyFingerprint
-
-    }
-
-    fun publishPublicKey(context: Context) {
-        try {
-            PgpUtils.getInstance(context, defaultPassphrase).publishPublicKey()
-        } catch (ex:Exception) {
-
-        }
+        return ProofMode.getPublicKeyString(context.applicationContext, defaultPassphrase)
     }
 
 

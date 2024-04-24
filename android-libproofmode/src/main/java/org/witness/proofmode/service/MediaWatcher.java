@@ -329,14 +329,15 @@ public class MediaWatcher extends BroadcastReceiver implements ProofModeV1Consta
                 mContext.sendBroadcast(intent);
                 return null;
             } catch (SecurityException e) {
-                Timber.d("SecurityException: security exception accessing URI: %s", uriMedia);
+                Timber.d("SecurityException: security exception accessing exception:%s",e.getMessage());
+                e.printStackTrace();
                 Intent intent = new Intent(EVENT_PROOF_FAILED);
                 intent.setData(uriMedia);
                 mContext.sendBroadcast(intent);
                 return null;
 
             } catch (PGPException e) {
-                Timber.d("SecurityException: security exception accessing URI: %s", uriMedia);
+                Timber.d("SecurityException: security exception accessing URI: %s,Error:%s", uriMedia, e.getMessage());
                 Intent intent = new Intent(EVENT_PROOF_FAILED);
                 intent.setData(uriMedia);
                 mContext.sendBroadcast(intent);
