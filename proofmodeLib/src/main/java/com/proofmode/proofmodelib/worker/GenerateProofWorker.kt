@@ -8,7 +8,9 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.proofmode.proofmodelib.utils.ProofModeUtils
 import org.witness.proofmode.ProofMode
+import org.witness.proofmode.service.MediaWatcher
 import timber.log.Timber
+import java.util.Date
 
 class GenerateProofWorker(
         private val context: Context,
@@ -20,7 +22,7 @@ class GenerateProofWorker(
         Timber.d("Worker uri path ${audioUri.path}")
         val existingHash = ProofModeUtils.proofExistsForMedia(context, audioUri)
         if (existingHash.isNullOrEmpty()) {
-            val hash: String? = ProofMode.generateProof(context, Uri.parse(audioUriString))
+            val hash: String? = MediaWatcher.getInstance(context.applicationContext).processUri(audioUri,true,Date())   //ProofMode.generateProof(context, Uri.parse(audioUriString))
             if (!hash.isNullOrEmpty()) {
                 return Result.success(workDataOf(ProofModeUtils.MEDIA_HASH to hash))
             }

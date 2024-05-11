@@ -21,23 +21,40 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Handler;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.preference.PreferenceManager;
 
 import com.dimowner.audiorecorder.audio.player.PlayerContractNew;
 import com.dimowner.audiorecorder.data.Prefs;
 import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.C2paUtils;
 import com.proofmode.proofmodelib.utils.ProofModeUtils;
+
 //import com.google.firebase.FirebaseApp;
+
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.witness.proofmode.ProofMode;
+import org.witness.proofmode.ProofModeConstants;
+import org.witness.proofmode.crypto.pgp.PgpUtils;
+
+import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.Executors;
 
 import timber.log.Timber;
 
 public class ARApplication extends Application {
+
 
 	final static String AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
 	private AudioOutputChangeReceiver audioOutputChangeReceiver;
@@ -50,6 +67,9 @@ public class ARApplication extends Application {
 
 	public static Injector injector;
 
+	private PgpUtils mPgpUtils;
+	private SharedPreferences mPrefs;
+
 	public static Injector getInjector() {
 		return injector;
 	}
@@ -57,6 +77,18 @@ public class ARApplication extends Application {
 	public static String appPackage() {
 		return PACKAGE_NAME;
 	}
+
+	private void initPgpKey() throws PGPException, IOException {
+		if (mPgpUtils == null) {
+			PgpUtils.init(this, mPrefs.getString(ProofModeConstants.PREFS_KEY_PASSPHRASE,ProofModeConstants.PREFS_KEY_PASSPHRASE_DEFAULT));
+			mPgpUtils = PgpUtils.getInstance();
+		}
+	}
+
+
+
+
+
 
 	/**
 	 * Calculate density pixels per second for record duration.
@@ -71,18 +103,48 @@ public class ARApplication extends Application {
 		}
 	}
 
-	private void setC2paIdentity() {
-		String keyFingerPrint = ProofModeUtils.INSTANCE.getPublicKeyFingerprint(this);
-		String key = "0x" + keyFingerPrint;
+	private void setC2paIdentity() throws PGPException, IOException {
+		String key = "0x" + PgpUtils.getInstance().getPublicKeyFingerprint();
+		//String key = "0x" + ProofMode.getPublicKeyString();
 		String email = "info@proofmode.org";
 		String display = email.replace("@","at");
 		String uri =
-				"https://keys.openpgp.org/search?q=" + keyFingerPrint;
+				"https://keys.openpgp.org/search?q=" + key;
 		C2paUtils.Companion.setC2PAIdentity(display,uri,email,key);
 	}
 
 	public static int getLongWaveformSampleCount() {
 		return (int)(AppConstants.WAVEFORM_WIDTH * screenWidthDp);
+	}
+
+	public void checkAndGeneratePublicKey() {
+		Executors.newSingleThreadExecutor().execute(() -> {
+			try {
+				String pubKey = null;
+				if (PgpUtils.keyRingExists(this)) {
+					pubKey = PgpUtils.getInstance().getPublicKeyFingerprint();
+				} else {
+					String newPassphrase = generateRandomPassword(12);
+					Timber.d("checkAndGeneratePublicKey password: " + newPassphrase);
+					mPrefs.edit().putString(ProofModeConstants.PREFS_KEY_PASSPHRASE, newPassphrase).commit();
+					pubKey = PgpUtils.getInstance().getPublicKeyFingerprint();
+				}
+			} catch (Exception ex) {
+				Timber.e(ex,"Error getting public key");
+			}
+
+        });
+
+	}
+
+	private String generateRandomPassword(int length) {
+		String charSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		Random random = new Random(System.nanoTime());
+		StringBuilder password = new StringBuilder();
+		for (int i = 0; i < length; i++) {
+			password.append(charSet.charAt(random.nextInt(charSet.length())));
+		}
+		return password.toString();
 	}
 
 	@Override
@@ -97,6 +159,8 @@ public class ARApplication extends Application {
 			});
 		}
 		super.onCreate();
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		checkAndGeneratePublicKey();
 		try {
 			Os.setenv("TMPDIR",getCacheDir().getAbsolutePath(), true);
 		} catch (ErrnoException e) {
@@ -104,9 +168,19 @@ public class ARApplication extends Application {
 		}
 
 
+
+		try {
+			initPgpKey();
+		} catch (PGPException | IOException e) {
+			Timber.e("There was an error while initializing PGP key");
+		}
 		// Generate C2pa credentials
-		setC2paIdentity();
-		// Add notarization providers
+        try {
+            setC2paIdentity();
+        } catch (PGPException | IOException e) {
+			Timber.e("There was an error while generating C2pa credentials");
+        }
+        // Add notarization providers
 		ProofModeUtils.INSTANCE.addDefaultNotarizationProviders(this);
 		PACKAGE_NAME = getApplicationContext().getPackageName();
 		applicationHandler = new Handler(getApplicationContext().getMainLooper());

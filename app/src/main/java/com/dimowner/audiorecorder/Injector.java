@@ -52,6 +52,9 @@ import com.dimowner.audiorecorder.app.settings.SettingsContract;
 import com.dimowner.audiorecorder.app.settings.SettingsPresenter;
 import com.dimowner.audiorecorder.data.database.TrashDataSource;
 
+import org.witness.proofmode.storage.DefaultStorageProvider;
+import org.witness.proofmode.storage.StorageProvider;
+
 public class Injector {
 
     private final Context context;
@@ -73,6 +76,7 @@ public class Injector {
     private MoveRecordsViewModel moveRecordsViewModel;
 
     private AudioPlayerNew audioPlayer = null;
+    private StorageProvider storageProvider;
 
     public Injector(Context context) {
         this.context = context;
@@ -84,6 +88,12 @@ public class Injector {
 
     public RecordsDataSource provideRecordsDataSource() {
         return RecordsDataSource.getInstance(context);
+    }
+    public StorageProvider provideStorageProvider() {
+        if (storageProvider == null) {
+            storageProvider = new DefaultStorageProvider(context.getApplicationContext());
+        }
+        return storageProvider;
     }
 
 

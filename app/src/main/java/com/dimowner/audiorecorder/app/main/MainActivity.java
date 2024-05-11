@@ -78,7 +78,13 @@ import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
 import com.proofmode.proofmodelib.utils.ProofModeUtils;
 
+import org.bouncycastle.openpgp.PGPException;
+import org.witness.proofmode.crypto.pgp.PgpUtils;
+import org.witness.proofmode.storage.StorageProvider;
+
 import java.io.File;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import timber.log.Timber;
@@ -119,8 +125,10 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     private LinearLayout pnlImportProgress;
     private LinearLayout pnlRecordProcessing;
     private ImageView ivPlaceholder;
-
     private MainContract.UserActionsListener presenter;
+    private StorageProvider storageProvider;
+    private PgpUtils pgpUtils;
+
     private final ServiceConnection connection = new ServiceConnection() {
 
         @Override
@@ -165,9 +173,19 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         colorMap = ARApplication.getInjector().provideColorMap();
+        try{
+            pgpUtils = PgpUtils.getInstance();
+        } catch (PGPException ex) {
+            Timber.e(ex,"Error creating pgpUtils");
+        }
+        storageProvider = ARApplication.getInjector().provideStorageProvider();
+
         setTheme(colorMap.getAppThemeResource());
         super.onCreate(savedInstanceState);
         startActivity(new Intent(this, PermissionsActivity.class));
+        // Check and GenerateKey
+        //ARApplication app = (ARApplication) getApplication();
+        //app.checkAndGeneratePublicKey();
         setContentView(R.layout.activity_main);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             AndroidUtils.requestPermissionToPostNotification(this);
@@ -732,11 +750,28 @@ public class MainActivity extends Activity implements MainContract.View, View.On
         Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
         String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
 
-        File file = ProofModeUtils.INSTANCE.getProofDirectory(hash, getApplicationContext());
+       /* File file = ProofModeUtils.INSTANCE.getProofDirectory(hash, getApplicationContext());
         File proofZip = ProofModeUtils.INSTANCE.makeProofZip(file, getApplicationContext());
-        ProofModeUtils.INSTANCE.shareZipFile(getApplicationContext(), proofZip, getApplicationContext().getPackageName());
+        ProofModeUtils.INSTANCE.shareZipFile(getApplicationContext(), proofZip, getApplicationContext().getPackageName());*/
+        if (hash != null) {
+            var proofSet = storageProvider.getProofSet(hash);
+            proofSet.add(contentUri);
+            File file = new File(getFilesDir(),record.getName() +"-proof-"  + ProofModeUtils.INSTANCE.getDateFormat().format(new Date()) + ".zip");
+            ProofModeUtils.INSTANCE.createZipFileFromUris(getApplicationContext(),proofSet,file);
+            ProofModeUtils.INSTANCE.shareZipFile(this,file,getApplicationContext().getPackageName());
+        } else {
+            Toast.makeText(this, "No hash found", Toast.LENGTH_SHORT).show();
+        }
 
     }
+
+    private void shareProof(Uri audioUri,String mediaPath,
+                            StringBuffer stringBuffer
+                            ) {
+        String baseFolder = "proofmode";
+        
+    }
+
     @Override
     public void shareRecordC2pa(Record record) {
         Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
@@ -901,6 +936,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 
         });
     }
+
 
     private boolean checkStoragePermissionDownload() {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

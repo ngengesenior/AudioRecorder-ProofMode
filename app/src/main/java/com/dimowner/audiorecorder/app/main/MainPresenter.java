@@ -210,29 +210,12 @@ public class MainPresenter implements MainContract.UserActionsListener {
                 }
 
                 public void generateContentCredentials(Record record) {
-                    /*Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(
-                            new File(record.getPath()),
-                            contextRef.get().getApplicationContext(),
-                            contextRef.get().getPackageName()
-                    );*/ //Uri.fromFile(new File(record.getPath()));
                     Context appCtx = contextRef.get().getApplicationContext();
                     C2paUtils.Companion.generateContentCredentials(
                             appCtx,
                             record.getPath(),
                             true,
                             false, null);
-                    /*if (hash != null && !hash.isEmpty()) {
-
-                        Timber.d("generateContentCredentials: $hash");
-                        //File outputDir = ProofModeUtils.INSTANCE.getProofDirectory(hash,appCtx);
-                        C2paUtils.Companion.generateContentCredentials(
-                                appCtx,
-                                record.getPath(),
-                                true,
-                                false, null);
-                    } else  {
-                        Timber.d("Hash is null I do not know why");
-                    }*/
                 }
 
                 @Override
