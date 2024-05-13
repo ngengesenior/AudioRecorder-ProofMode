@@ -17,6 +17,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.dimowner.audiorecorder.ARApplication
+import com.dimowner.audiorecorder.ColorMap
 import com.dimowner.audiorecorder.databinding.ActivityProofmodeSettingsBinding
 import com.proofmode.proofmodelib.utils.ProofModeUtils.getLocationProofPref
 import com.proofmode.proofmodelib.utils.ProofModeUtils.getNetworkProofPref
@@ -37,6 +39,9 @@ class ProofModeSettingsActivity : AppCompatActivity() {
     private lateinit var networkPermLauncher: ActivityResultLauncher<String>
     private lateinit var phonePermLauncher: ActivityResultLauncher<String>
     private lateinit var locationPermLauncher: ActivityResultLauncher<Array<String>>
+    private  val colorMap: ColorMap by lazy {
+        ARApplication.getInjector().provideColorMap(applicationContext)
+    }
 
 
     private val prefs: SharedPreferences by lazy {
@@ -45,6 +50,7 @@ class ProofModeSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(colorMap.appThemeResource)
         binding = ActivityProofmodeSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()

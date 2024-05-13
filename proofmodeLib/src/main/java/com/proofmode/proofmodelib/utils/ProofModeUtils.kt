@@ -10,6 +10,7 @@ import android.text.TextUtils
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import androidx.work.Data
 import com.proofmode.proofmodelib.BuildConfig
 import com.proofmode.proofmodelib.notaries.GoogleSafetyNetNotarizationProvider
@@ -34,18 +35,18 @@ import java.util.zip.ZipOutputStream
 object ProofModeUtils {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+    const val AUTO_GENERATED_KEY = "auto_generated"
     const val MEDIA_KEY = "audio"
     const val MEDIA_HASH = "mediaHash"
     val TAG = ProofModeUtils::class.simpleName
     private const val DOCUMENT_AUDIO =
             "content://com.android.providers.media.documents/document/audio%3A"
     private const val MEDIA_AUDIO = "content://media/external/audio/media/"
-    val BUFFER_SIZE = 1024 * 8
 
     fun getStorageProvider(context: Context): StorageProvider {
         return DefaultStorageProvider(context.applicationContext)
     }
-    fun makeProofZip(proofDirPath: File, context: Context): File {
+    /*fun makeProofZip(proofDirPath: File, context: Context): File {
         val files = proofDirPath.listFiles()
         Timber.d("makeProofZip: files.size = ${files.size}")
         val outputZipFile = File(context.filesDir, "proofmode-audio-recorder${proofDirPath.name}.zip")
@@ -67,7 +68,7 @@ object ProofModeUtils {
         }
 
         return outputZipFile
-    }
+    }*/
     fun createZipFileFromUris(context: Context,uris: List<Uri>, outputZipFile: File) {
         val bufferSize = 8192
         val buffer = ByteArray(bufferSize)
@@ -109,132 +110,6 @@ object ProofModeUtils {
     }
 
 
-    /**
-     *
-     *Given fileZip and Uris, add files to zip file
-     * The @param fileZip is the file to create and write to
-     */
-    fun ZipProof(context: Context,uris:ArrayList<Uri?>, fileZip:File?,
-                            storageProvider:StorageProvider,
-                 c2paCertPath:String) {
-        var origin:BufferedInputStream
-        val dest = FileOutputStream(fileZip)
-        val out = ZipOutputStream(BufferedOutputStream(dest))
-        val data = ByteArray(BUFFER_SIZE)
-        val contentResolver = context.applicationContext.contentResolver
-
-        for (uri in uris) {
-            try {
-                val fileName = getFileNameFromUri(context, uri)
-                Timber.d("Adding to zip: $fileName")
-                var isProofItem = storageProvider.getProofItem(uri)
-                if (isProofItem == null) {
-                    isProofItem = contentResolver.openInputStream(uri!!)
-                    origin = BufferedInputStream(isProofItem, BUFFER_SIZE)
-                    val entry = ZipEntry(fileName)
-                    out.putNextEntry(entry)
-                    var count:Int
-                    while (origin.read(data, 0, BUFFER_SIZE).also { count = it } != -1) {
-                        out.write(data, 0, count)
-                    }
-                    origin.close()
-                    out.closeEntry()
-                }
-
-            } catch (e:Exception) {
-                Timber.e("Failed adding URI to zip: ${uri?.lastPathSegment}")
-            }
-        }
-        Timber.d("Adding public key")
-        val pubKey = ProofMode.getPublicKeyString()
-        var entry:ZipEntry? = ZipEntry("pubkey.asc")
-        out.putNextEntry(entry)
-        out.write(pubKey.toByteArray())
-        val fileCert = File(context.filesDir,c2paCertPath)
-        if (fileCert.exists()) {
-            Timber.d("Adding certificate")
-            entry = ZipEntry(c2paCertPath)
-            out.putNextEntry(entry)
-            out.write(fileCert.readBytes())
-        }
-        Timber.d("Adding HowToVerifyProofData.txt")
-        val howToFile = "HowToVerifyProofData.txt"
-        entry = ZipEntry(howToFile)
-        out.putNextEntry(entry)
-        val inputStream = context.applicationContext.resources.assets.open(howToFile)
-        val buffer = ByteArray(1024)
-        var length = inputStream.read(buffer)
-        while (length != -1) {
-            out.write(buffer, 0, length)
-            length = inputStream.read(buffer)
-        }
-        inputStream.close()
-    }
-
-    fun getFileNameFromUri(context: Context, uri: Uri?): String? {
-        val contentResolver = context.applicationContext.contentResolver
-        val projection = arrayOfNulls<String>(2)
-        val mimeType = contentResolver.getType(uri!!)
-        val mimeTypeMap = MimeTypeMap.getSingleton()
-        val fileExt = mimeTypeMap.getExtensionFromMimeType(mimeType)
-        if (mimeType != null) {
-            if (mimeType.startsWith("image")) {
-                projection[0] = MediaStore.Images.Media.DATA
-                projection[1] = MediaStore.Images.Media.DISPLAY_NAME
-            } else if (mimeType.startsWith("video")) {
-                projection[0] = MediaStore.Video.Media.DATA
-                projection[1] = MediaStore.Video.Media.DISPLAY_NAME
-            } else if (mimeType.startsWith("audio")) {
-                projection[0] = MediaStore.Audio.Media.DATA
-                projection[1] = MediaStore.Audio.Media.DISPLAY_NAME
-            }
-        } else {
-            projection[0] = MediaStore.Audio.Media.DATA
-            projection[1] = MediaStore.Audio.Media.DISPLAY_NAME
-        }
-        val cursor = contentResolver.query(getRealUri(uri)!!, projection, null, null, null)
-        val result = false
-
-        //default name with file extension
-        var fileName = uri.lastPathSegment
-        if (fileExt != null && fileName!!.indexOf(".") == -1) fileName += ".$fileExt"
-        if (cursor != null) {
-            if (cursor.count > 0) {
-                cursor.moveToFirst()
-                try {
-                    var columnIndex = cursor.getColumnIndexOrThrow(projection[0])
-                    val path = cursor.getString(columnIndex)
-                    if (path != null) {
-                        val fileMedia = File(path)
-                        if (fileMedia.exists()) fileName = fileMedia.name
-                    }
-                    if (TextUtils.isEmpty(fileName)) {
-                        columnIndex = cursor.getColumnIndexOrThrow(projection[1])
-                        fileName = cursor.getString(columnIndex)
-                    }
-                } catch (_: IllegalArgumentException) {
-                }
-            }
-            cursor.close()
-        }
-        if (TextUtils.isEmpty(fileName)) fileName = uri.lastPathSegment
-        return fileName
-    }
-
-    fun getRealUri(contentUri: Uri?): Uri? {
-        val unusablePath = contentUri!!.path
-        val startIndex = unusablePath!!.indexOf("external/")
-        val endIndex = unusablePath.indexOf("/ACTUAL")
-        return if (startIndex != -1 && endIndex != -1) {
-            val embeddedPath = unusablePath.substring(startIndex, endIndex)
-            val builder = contentUri.buildUpon()
-            builder.path(embeddedPath)
-            builder.authority("media")
-            builder.build()
-        } else contentUri
-    }
-
-
 
 
     fun createData(key: String, value: Any?): Data {
@@ -244,6 +119,16 @@ object ProofModeUtils {
         }
         return builder.build()
     }
+    fun createDataForProofWorker(
+        mediaUriString:String,
+        proofWasAutogenerated:Boolean? = false):Data{
+        val builder = Data.Builder()
+        builder.putString(MEDIA_KEY,mediaUriString)
+        builder.putBoolean(AUTO_GENERATED_KEY,proofWasAutogenerated?:false)
+        return builder.build()
+
+    }
+
 
     fun shareZipFile(context: Context, zipFile: File, packageName: String) {
         val authority = "$packageName.app_file_provider"
@@ -260,22 +145,21 @@ object ProofModeUtils {
     }
 
     fun generateProof(uriMedia: Uri, context: Context): String {
-        ProofMode.setProofPoints(context.applicationContext, true, true, true, true)
+        ProofMode.setProofPoints(context.applicationContext,
+            true,
+            true, true, true)
         val proofHash = ProofMode.generateProof(context.applicationContext, uriMedia)
         return proofHash ?: ""
     }
 
-    fun generateProof(file: File, context: Context, packageName: String): String {
-        val uri = getUriForFile(file, context, packageName)
-        return generateProof(uri, context)
+    fun setProofPoints(context: Context) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        ProofMode.setProofPoints(context.applicationContext,
+            prefs.getPhoneStateProofPref(),
+            prefs.getLocationProofPref(),
+            prefs.getNetworkProofPref(),
+            prefs.getNotaryProofPref())
     }
-
-    /**
-     * public static Uri getUriForFile(File file, Context context) {
-    return FileProvider.getUriForFile(context.getApplicationContext(),
-    context.getPackageName() + ".app_file_provider", file);
-    }
-     */
 
     fun getUriForFile(file: File, context: Context, packageName: String): Uri {
         return FileProvider.getUriForFile(
@@ -291,24 +175,15 @@ object ProofModeUtils {
             ProofMode.addNotarizationProvider(context,GoogleSafetyNetNotarizationProvider(context))
         }catch (ex:Exception) {
             Timber.e(ex)
-            Timber.e("GoogleSafetyNetNotarizationProvider failed")
         }
         try {
             ProofMode.addNotarizationProvider(context,OpenTimestampsNotarizationProvider())
         }catch (ex:Exception) {
             Timber.e(ex)
-            Timber.e("OpenTimestampsNotarizationProvider failed")
         }
 
 
     }
-
-
-
-    fun retrieveOrCreateHash(uriMedia: Uri, context: Context): String {
-        return MediaWatcher.getInstance(context).processUri(uriMedia, true, Date())
-    }
-
     fun SharedPreferences.getLocationProofPref(): Boolean {
         return this.getBoolean(ProofMode.PREF_OPTION_LOCATION, false)
     }
@@ -365,8 +240,6 @@ object ProofModeUtils {
                 context.applicationContext.contentResolver.openInputStream(mediaUri)
         )
         if (hash != null) {
-            //hashCache[sMediaUri] = hash
-            Timber.d("Proof check if exists for URI %s and hash %s", mediaUri, hash)
             val storageProvider = getStorageProvider(context)
             if(storageProvider.proofExists(hash)){
                 if (storageProvider.proofIdentifierExists(hash,hash+ProofMode.PROOF_FILE_TAG)) {
@@ -381,59 +254,6 @@ object ProofModeUtils {
         ProofMode.getProofDir(context, hash)
         return ProofMode.getProofDir(context, hash)
     }*/
-
-    fun shareProofClassic(
-        audioUri: Uri, mediaPath: String,
-        stringBuffer: StringBuffer,
-        context: Context,
-        pgpFingerprint: String
-    ) :String?{
-        val baseFolder = "proofmode"
-        val ctx = context.applicationContext
-        val hash = HashUtils.getSHA256FromFileContent(ctx.contentResolver.openInputStream(audioUri))
-        val fileMedia = File(mediaPath)
-        var fileMediaSig = File(mediaPath + ProofMode.OPENPGP_FILE_TAG)
-        var fileMediaProof = File(mediaPath + ProofMode.PROOF_FILE_TAG)
-        var fileMediaProofSig = File(fileMediaProof.absolutePath + ProofMode.OPENPGP_FILE_TAG)
-
-        // Check different locations
-        if (!fileMediaSig.exists()) {
-            fileMediaSig = File(Environment.getExternalStorageDirectory(),"$baseFolder$mediaPath${ProofMode.OPENPGP_FILE_TAG}")
-            fileMediaProof = File(Environment.getExternalStorageDirectory(),"$baseFolder$mediaPath${ProofMode.PROOF_FILE_TAG}")
-            fileMediaProofSig = File(fileMediaProof.absolutePath + ProofMode.OPENPGP_FILE_TAG)
-            if (!fileMediaSig.exists()) {
-                fileMediaSig = File(ctx.getExternalFilesDir(null),mediaPath + ProofMode.OPENPGP_FILE_TAG)
-                fileMediaProof = File(ctx.getExternalFilesDir(null),mediaPath + ProofMode.PROOF_FILE_TAG)
-                fileMediaProofSig = File(fileMediaProof.absolutePath + ProofMode.OPENPGP_FILE_TAG)
-
-            }
-
-        }
-
-
-        stringBuffer.apply {
-            append(fileMedia.name)
-            append(' ')
-            append("was last modified on")
-            append(' ')
-            append(dateFormat.format(fileMedia.lastModified()))
-            append(' ')
-            append(" It has a SHA-256 hash of")
-            append(' ')
-            append(hash)
-            append("\n\n")
-            append("This proof is signed by the PGP key 0x")
-            append(pgpFingerprint)
-            append("\n")
-
-        }
-        return hash
-    }
-
-
-    fun getPublicKeyFingerprint():String {
-        return ProofMode.getPublicKeyString()
-    }
 
 
 }

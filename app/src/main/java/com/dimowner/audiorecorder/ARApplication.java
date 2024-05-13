@@ -71,6 +71,9 @@ public class ARApplication extends Application {
 	private SharedPreferences mPrefs;
 
 	public static Injector getInjector() {
+		if (injector == null) {
+			injector = new Injector();
+		}
 		return injector;
 	}
 
@@ -117,6 +120,8 @@ public class ARApplication extends Application {
 		return (int)(AppConstants.WAVEFORM_WIDTH * screenWidthDp);
 	}
 
+
+
 	public void checkAndGeneratePublicKey() {
 		Executors.newSingleThreadExecutor().execute(() -> {
 			try {
@@ -160,6 +165,7 @@ public class ARApplication extends Application {
 		}
 		super.onCreate();
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		ProofModeUtils.INSTANCE.setProofPoints(this);
 		checkAndGeneratePublicKey();
 		try {
 			Os.setenv("TMPDIR",getCacheDir().getAbsolutePath(), true);
@@ -185,8 +191,8 @@ public class ARApplication extends Application {
 		PACKAGE_NAME = getApplicationContext().getPackageName();
 		applicationHandler = new Handler(getApplicationContext().getMainLooper());
 		screenWidthDp = AndroidUtils.pxToDp(AndroidUtils.getScreenWidth(getApplicationContext()));
-		injector = new Injector(getApplicationContext());
-		Prefs prefs = injector.providePrefs();
+		injector = new Injector();
+		Prefs prefs = injector.providePrefs(getApplicationContext());
 		if (!prefs.isMigratedSettings()) {
 			prefs.migrateSettings();
 		}

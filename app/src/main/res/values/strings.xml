@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Audio Recorder</string>
+    <string name="app_name">ProofMode Audio Recorder</string>
 
     <string name="records">Records</string>
     <string name="settings">Settings</string>
@@ -238,10 +238,7 @@
     <string name="move_all">Move all</string>
 
     <!-- Shown in the 'About' window of the app. -->
-    <string name="about_body"><![CDATA[
-    	<b>Audio Recorder 2021</b><br>
-		Version %s
-	]]></string>
+    <string name="about_body"><![CDATA[     	<b>ProofMode Audio Recorder 2024</b><br> 		Version %s 	]]></string>
     <!--<a href="http://#/">Application site</a>-->
 
     <string-array name="theme_colors2">

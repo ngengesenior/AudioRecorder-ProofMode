@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!--Created by The Translator <https://play.google.com/store/apps/details?id=com.sunilpaulmathew.translator>-->
 
-    <string name="app_name">Grabador de Audio</string>
+    <string name="app_name">Grabador de Audio ProofMode</string>
     <string name="records">Grabaciones</string>
     <string name="settings">Ajustes</string>
     <string name="setup">Setup</string>
@@ -174,7 +174,7 @@
 
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
-    	<b>Audio Recorder 2021</b><br>
+    	<b>Audio Recorder 2024</b><br>
 		Version %s
 	]]></string>
     <string name="mandatory_recorder_permission_message">Permita que la grabadora de audio acceda a su micrófono y almacenamiento. El micrófono es necesario para capturar la voz durante la grabación, mientras que el permiso de almacenamiento es necesario para guardar una grabación.</string>

@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import timber.log.Timber;
 
@@ -36,9 +38,6 @@ public class PhotosContentJob extends JobService {
 
     JobParameters mRunningParams;
 
-    Handler mHandler = new Handler();
-
-    private Context mContext = null;
 
     // Check whether this job is currently scheduled.
     public static boolean isScheduled(Context context) {
@@ -76,69 +75,63 @@ public class PhotosContentJob extends JobService {
         return true;
     }
 
-    private static HashMap<Uri,String> mUriStack = new HashMap<>();
+    //private static HashMap<Uri,String> mUriStack = new HashMap<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private synchronized void doWork ()
+    private void doWork ()
     {
 
-        if (mRunningParams.getTriggeredContentAuthorities() != null) {
 
-            if (mRunningParams.getTriggeredContentUris() != null) {
+                if (mRunningParams.getTriggeredContentAuthorities() != null) {
 
-                for (Uri uri : mRunningParams.getTriggeredContentUris()) {
+                    if (mRunningParams.getTriggeredContentUris() != null) {
 
-                    if (!mUriStack.containsKey(uri))
-                        mUriStack.put(uri,uri.toString());
+                        HashMap<String, Uri> uriList = new HashMap<String, Uri>();
 
-                }
-
-                /**
-                ArrayList<Uri> uris = new ArrayList<>(mUriStack.keySet());
-
-                for (Uri uri : uris) {
-                    MediaWatcher.getInstance(PhotosContentJob.this).processUri(uri, true);
-                    mUriStack.remove(uri);
-                }**/
-
-                Timer t = new Timer();
-                t.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        ArrayList<Uri> uris = new ArrayList<>(mUriStack.keySet());
-
-                        for (Uri uri : uris) {
+                        for (Uri uri : mRunningParams.getTriggeredContentUris()) {
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 uri = MediaStore.setRequireOriginal(uri);
                             }
 
-                            try {
-                                MediaWatcher mw = MediaWatcher.getInstance(PhotosContentJob.this);
-                                String resultProofHash = mw.processUri(uri,  true, null);
-                                mUriStack.remove(uri);
+                            String mediaPath = MediaWatcher.getMediaPath(PhotosContentJob.this, uri);
 
-                            } catch (RuntimeException e) {
-                                Timber.d(e,"Error generating hash from proof URI");
+                            if (mediaPath != null)
+                                uriList.put(mediaPath, uri);
+                            else
+                                uriList.put(uri.toString(), uri);
+                        }
 
-                            }
+                        for (Uri uri : uriList.values())
+                        {
 
+                            final Uri uriProcess = uri;
+
+                            executor.execute(() -> {
+                                try {
+                                    MediaWatcher mw = MediaWatcher.getInstance(PhotosContentJob.this);
+                                    String resultProofHash = mw.processUri(uriProcess, true, null);
+
+                                } catch (RuntimeException e) {
+                                    Timber.d(e, "Error generating hash from proof URI");
+
+                                }
+                            });
 
                         }
 
+
+                    } else {
+                        // We don't have any details about URIs (because too many changed at once),
+                        // so just note that we need to do a full rescan.
+
+                        Timber.w("rescan is needed since many photos changed at once");
+                        //      Toast.makeText(this,"Rescan is needed!",Toast.LENGTH_SHORT).show();
+
+
                     }
-                }, MediaWatcher.PROOF_GENERATION_DELAY_TIME_MS);
+                }
 
-            } else {
-                // We don't have any details about URIs (because too many changed at once),
-                // so just note that we need to do a full rescan.
-
-                Timber.w("rescan is needed since many photos changed at once");
-          //      Toast.makeText(this,"Rescan is needed!",Toast.LENGTH_SHORT).show();
-
-
-            }
-
-        }
 
 
     }

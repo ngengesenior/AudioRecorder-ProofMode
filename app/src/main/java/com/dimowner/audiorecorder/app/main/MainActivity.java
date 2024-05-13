@@ -172,13 +172,13 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        colorMap = ARApplication.getInjector().provideColorMap();
+        colorMap = ARApplication.getInjector().provideColorMap(getApplicationContext());
         try{
             pgpUtils = PgpUtils.getInstance();
         } catch (PGPException ex) {
             Timber.e(ex,"Error creating pgpUtils");
         }
-        storageProvider = ARApplication.getInjector().provideStorageProvider();
+        storageProvider = ARApplication.getInjector().provideStorageProvider(getApplicationContext());
 
         setTheme(colorMap.getAppThemeResource());
         super.onCreate(savedInstanceState);
@@ -255,8 +255,8 @@ public class MainActivity extends Activity implements MainContract.View, View.On
             }
         });
 
-        presenter = ARApplication.getInjector().provideMainPresenter();
-        fileRepository = ARApplication.getInjector().provideFileRepository();
+        presenter = ARApplication.getInjector().provideMainPresenter(getApplicationContext());
+        fileRepository = ARApplication.getInjector().provideFileRepository(getApplicationContext());
 
         waveformView.setOnSeekListener(new WaveformViewNew.OnSeekListener() {
             @Override
@@ -313,7 +313,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 //			presenter.checkPublicStorageRecords();
         }
         presenter.checkFirstRun();
-        presenter.setAudioRecorder(ARApplication.getInjector().provideAudioRecorder());
+        presenter.setAudioRecorder(ARApplication.getInjector().provideAudioRecorder(getApplicationContext()));
         presenter.updateRecordingDir(getApplicationContext());
         presenter.loadActiveRecord();
 
@@ -746,13 +746,8 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     @Override
     public void shareRecordProof(Record record) {
 
-        //Timber.d("The uri scheme is %s", uri.getScheme());
         Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
         String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
-
-       /* File file = ProofModeUtils.INSTANCE.getProofDirectory(hash, getApplicationContext());
-        File proofZip = ProofModeUtils.INSTANCE.makeProofZip(file, getApplicationContext());
-        ProofModeUtils.INSTANCE.shareZipFile(getApplicationContext(), proofZip, getApplicationContext().getPackageName());*/
         if (hash != null) {
             var proofSet = storageProvider.getProofSet(hash);
             proofSet.add(contentUri);
@@ -762,45 +757,6 @@ public class MainActivity extends Activity implements MainContract.View, View.On
         } else {
             Toast.makeText(this, "No hash found", Toast.LENGTH_SHORT).show();
         }
-
-    }
-
-    private void shareProof(Uri audioUri,String mediaPath,
-                            StringBuffer stringBuffer
-                            ) {
-        String baseFolder = "proofmode";
-        
-    }
-
-    @Override
-    public void shareRecordC2pa(Record record) {
-        Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
-        AndroidUtils.shareAudioFile(getApplicationContext(),record.getPath(),record.getName(),"*");
-       /* String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
-        if (hash != null) {
-            try {
-                File dir = ProofModeUtils.INSTANCE.getProofDirectory(hash,getApplicationContext());
-                File file = C2paUtils.Companion.generateContentCredentials(this,record.getPath(),true,false,dir);
-                String authority = getApplicationContext().getPackageName() + ".app_file_provider";
-                Uri uri = FileProvider.getUriForFile(getApplicationContext(), authority, file);
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                shareIntent.setType("audio/*");
-                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Intent chooserIntent = Intent.createChooser(shareIntent, "C2pa file");
-                chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(chooserIntent);
-            } catch (Exception ex) {
-                Timber.e("Error sharing file:%s", ex.getMessage());
-            }
-        } else  {
-            Timber.d("Hash not yet set");
-        }*/
-
-    }
-
-    @Override
-    public void generateProof(Context context, Record record) {
 
     }
 
@@ -912,9 +868,10 @@ public class MainActivity extends Activity implements MainContract.View, View.On
                 presenter.onDeleteClick();
             } else if (id == R.id.menu_share_proof) {
                 presenter.onShareRecordProofClick();
-            } else if(id == R.id.menu_share_c2pa ) {
-                presenter.onShareC2paClick();
             }
+            /*else if(id == R.id.menu_share_c2pa ) {
+                presenter.onShareC2paClick();
+            }*/
             return false;
         });
         MenuInflater inflater = popup.getMenuInflater();

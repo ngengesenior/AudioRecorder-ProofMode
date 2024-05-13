@@ -17,7 +17,7 @@
         android:text="@string/proofmode_settings_title"
         android:textAllCaps="false"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@android:color/black" />
+         />
 
     <TextView
         style="@style/ContentStyle"
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:text="@string/settings_description"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@android:color/black" />
+         />
 
     <TableLayout
         android:layout_width="match_parent"

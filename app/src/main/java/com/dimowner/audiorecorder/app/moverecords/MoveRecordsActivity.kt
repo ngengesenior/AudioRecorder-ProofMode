@@ -86,7 +86,7 @@ class MoveRecordsActivity : Activity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val colorMap = ARApplication.getInjector().provideColorMap()
+        val colorMap = ARApplication.getInjector().provideColorMap(applicationContext)
         setTheme(colorMap.appThemeResource)
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -96,7 +96,7 @@ class MoveRecordsActivity : Activity() {
         val view = binding.root
         setContentView(view)
 
-        viewModel = ARApplication.getInjector().provideMoveRecordsViewModel()
+        viewModel = ARApplication.getInjector().provideMoveRecordsViewModel(applicationContext)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(applicationContext)
         binding.recyclerView.adapter = adapter
