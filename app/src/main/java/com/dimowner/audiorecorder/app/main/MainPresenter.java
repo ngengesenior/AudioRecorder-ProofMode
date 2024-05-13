@@ -200,22 +200,13 @@ public class MainPresenter implements MainContract.UserActionsListener {
                         updateInformation(rec.getFormat(), rec.getSampleRate(), rec.getSize());
                         //TODO: I am sure we have to generate proof here after updating the info
                         onGenerateProof(contextRef.get().getApplicationContext(), record,true);
-                        generateContentCredentials(record);
+                        generateContentCredentials(record,true);
                     }
                     if (view != null) {
                         view.keepScreenOn(false);
                         view.hideProgress();
                         view.showRecordingStop();
                     }
-                }
-
-                public void generateContentCredentials(Record record) {
-                    Context appCtx = contextRef.get().getApplicationContext();
-                    C2paUtils.Companion.generateContentCredentials(
-                            appCtx,
-                            record.getPath(),
-                            true,
-                            false, null);
                 }
 
                 @Override
@@ -859,6 +850,8 @@ public class MainPresenter implements MainContract.UserActionsListener {
 
                             // Audio was imported, so proof is manually generated
                             onGenerateProof(context.getApplicationContext(),rec,false);
+                            generateContentCredentials(rec,false);
+
 
                             AndroidUtils.runOnUIThread(() -> {
                                 if (view != null) {
@@ -958,6 +951,15 @@ public class MainPresenter implements MainContract.UserActionsListener {
             }
             prefs.migrateDb3Finished();
         });
+    }
+
+    public void generateContentCredentials(Record record,boolean isDirectCapture) {
+        Context appCtx = contextRef.get().getApplicationContext();
+        C2paUtils.Companion.generateContentCredentials(
+                appCtx,
+                record.getPath(),
+                isDirectCapture,
+                false, null);
     }
 
     private String extractFileName(Context context, Uri uri) {
