@@ -1,23 +1,19 @@
-package com.proofmode.proofmodelib.utils
+package org.proofmode.audio.utils
 
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Environment
-import android.provider.MediaStore
-import android.text.TextUtils
-import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import androidx.work.Data
-import com.proofmode.proofmodelib.notaries.GoogleSafetyNetNotarizationProvider
-import com.proofmode.proofmodelib.notaries.SafetyNetCheck
+import com.dimowner.audiorecorder.BuildConfig
+import org.proofmode.audio.notaries.GoogleSafetyNetNotarizationProvider
+import org.proofmode.audio.notaries.SafetyNetCheck
 import org.witness.proofmode.ProofMode
 import org.witness.proofmode.crypto.HashUtils
 import org.witness.proofmode.notaries.OpenTimestampsNotarizationProvider
-import org.witness.proofmode.service.MediaWatcher
 import org.witness.proofmode.storage.DefaultStorageProvider
 import org.witness.proofmode.storage.StorageProvider
 import timber.log.Timber
@@ -26,11 +22,9 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import com.proofmode.proofmodelib.BuildConfig
 
 object ProofModeUtils {
 
@@ -173,7 +167,7 @@ object ProofModeUtils {
     fun addDefaultNotarizationProviders(context: Context) {
         SafetyNetCheck.setApiKey(BuildConfig.SAFETY_CHECK_KEY)
         try {
-            ProofMode.addNotarizationProvider(context,GoogleSafetyNetNotarizationProvider(context))
+            ProofMode.addNotarizationProvider(context, GoogleSafetyNetNotarizationProvider(context))
         }catch (ex:Exception) {
             Timber.e(ex)
         }

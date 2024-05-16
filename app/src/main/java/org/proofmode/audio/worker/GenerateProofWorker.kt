@@ -1,4 +1,4 @@
-package com.proofmode.proofmodelib.worker
+package org.proofmode.audio.worker
 
 import android.content.Context
 import android.net.Uri
@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.proofmode.proofmodelib.utils.ProofModeUtils
+import org.proofmode.audio.utils.ProofModeUtils
 import org.witness.proofmode.ProofMode
 import org.witness.proofmode.service.MediaWatcher
 import timber.log.Timber

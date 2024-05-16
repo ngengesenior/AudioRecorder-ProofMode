@@ -1,4 +1,4 @@
-package com.proofmode.proofmodelib.notaries;
+package org.proofmode.audio.notaries;
 
 import static org.witness.proofmode.ProofMode.GOOGLE_SAFETYNET_FILE_TAG;
 

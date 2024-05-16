@@ -1,4 +1,4 @@
-package com.proofmode.proofmodelib.notaries;
+package org.proofmode.audio.notaries;
 
 
 import android.util.Log;

@@ -20,14 +20,14 @@ import androidx.core.content.ContextCompat
 import com.dimowner.audiorecorder.ARApplication
 import com.dimowner.audiorecorder.ColorMap
 import com.dimowner.audiorecorder.databinding.ActivityProofmodeSettingsBinding
-import com.proofmode.proofmodelib.utils.ProofModeUtils.getLocationProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.getNetworkProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.getNotaryProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.getPhoneStateProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.saveLocationProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.saveNetworkProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.saveNotaryProofPref
-import com.proofmode.proofmodelib.utils.ProofModeUtils.savePhoneStateProofPref
+import org.proofmode.audio.utils.ProofModeUtils.getLocationProofPref
+import org.proofmode.audio.utils.ProofModeUtils.getNetworkProofPref
+import org.proofmode.audio.utils.ProofModeUtils.getNotaryProofPref
+import org.proofmode.audio.utils.ProofModeUtils.getPhoneStateProofPref
+import org.proofmode.audio.utils.ProofModeUtils.saveLocationProofPref
+import org.proofmode.audio.utils.ProofModeUtils.saveNetworkProofPref
+import org.proofmode.audio.utils.ProofModeUtils.saveNotaryProofPref
+import org.proofmode.audio.utils.ProofModeUtils.savePhoneStateProofPref
 
 class ProofModeSettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProofmodeSettingsBinding

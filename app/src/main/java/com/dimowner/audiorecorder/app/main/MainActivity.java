@@ -77,7 +77,7 @@ import com.dimowner.audiorecorder.util.AnimationUtil;
 import com.dimowner.audiorecorder.util.C2paUtils;
 import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
-import com.proofmode.proofmodelib.utils.ProofModeUtils;
+import org.proofmode.audio.utils.ProofModeUtils;
 
 import org.bouncycastle.openpgp.PGPException;
 import org.witness.proofmode.ProofModeConstants;

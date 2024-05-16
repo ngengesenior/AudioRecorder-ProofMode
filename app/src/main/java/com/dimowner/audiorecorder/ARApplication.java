@@ -37,7 +37,7 @@ import com.dimowner.audiorecorder.audio.player.PlayerContractNew;
 import com.dimowner.audiorecorder.data.Prefs;
 import com.dimowner.audiorecorder.util.AndroidUtils;
 import com.dimowner.audiorecorder.util.C2paUtils;
-import com.proofmode.proofmodelib.utils.ProofModeUtils;
+import org.proofmode.audio.utils.ProofModeUtils;
 
 //import com.google.firebase.FirebaseApp;
 

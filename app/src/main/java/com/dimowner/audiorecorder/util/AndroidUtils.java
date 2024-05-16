@@ -78,8 +78,8 @@ import com.dimowner.audiorecorder.R;
 import com.dimowner.audiorecorder.app.lostrecords.LostRecordsActivity;
 import com.dimowner.audiorecorder.app.lostrecords.RecordItem;
 import com.dimowner.audiorecorder.data.database.Record;
-import com.proofmode.proofmodelib.utils.ProofModeUtils;
-import com.proofmode.proofmodelib.worker.GenerateProofWorker;
+import org.proofmode.audio.utils.ProofModeUtils;
+import org.proofmode.audio.worker.GenerateProofWorker;
 
 import java.io.File;
 import java.io.IOException;
