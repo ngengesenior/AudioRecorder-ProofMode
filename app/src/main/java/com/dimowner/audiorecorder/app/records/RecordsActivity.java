@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -59,7 +60,11 @@ import com.dimowner.audiorecorder.util.AnimationUtil;
 import com.dimowner.audiorecorder.util.FileUtil;
 import com.dimowner.audiorecorder.util.TimeUtils;
 
+import org.proofmode.audio.utils.ProofModeUtils;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import timber.log.Timber;
@@ -263,7 +268,12 @@ public class RecordsActivity extends Activity implements RecordsContract.View, V
 		adapter.setOnItemOptionListener((menuId, item) -> {
 			if (menuId == R.id.menu_share) {
 				AndroidUtils.shareAudioFile(getApplicationContext(), item.getPath(), item.getName(), item.getFormat());
-			} else if (menuId == R.id.menu_info) {
+			}
+			else if (menuId == R.id.menu_share_proof) {
+				
+				shareProof(item.getPath(),item.getName());
+			}
+			else if (menuId == R.id.menu_info) {
 				presenter.onRecordInfo(Mapper.toRecordInfo(item));
 			} else if (menuId == R.id.menu_rename) {
 				setRecordName(item.getId(), item.getName(), item.getFormat());
@@ -345,6 +355,23 @@ public class RecordsActivity extends Activity implements RecordsContract.View, V
 				txtProgress.setText(TimeUtils.formatTimeIntervalHourMinSec2(mills));
 			}
 		});
+	}
+
+	private void shareProof (String path, String name) {
+
+		Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(path), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+		String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
+		if (hash != null) {
+			var storageProvider = ARApplication.getInjector().provideStorageProvider(getApplicationContext());
+			var proofSet = storageProvider.getProofSet(hash);
+			proofSet.add(contentUri);
+			File file = new File(getFilesDir(),name +"-proof-"  + ProofModeUtils.INSTANCE.getDateFormat().format(new Date()) + ".zip");
+			ProofModeUtils.INSTANCE.createZipFileFromUris(getApplicationContext(),proofSet,file);
+			ProofModeUtils.INSTANCE.shareZipFile(this,file,getApplicationContext().getPackageName());
+		} else {
+			Toast.makeText(this, "No hash found", Toast.LENGTH_SHORT).show();
+		}
+
 	}
 
 	@Override
