@@ -87,12 +87,12 @@ class MoveRecordsService : Service() {
 
 	override fun onCreate() {
 		super.onCreate()
-		colorMap = ARApplication.getInjector().provideColorMap()
-		prefs = ARApplication.getInjector().providePrefs()
+		colorMap = ARApplication.getInjector().provideColorMap(applicationContext)
+		prefs = ARApplication.getInjector().providePrefs(applicationContext)
 		copyTasks = ARApplication.getInjector().provideCopyTasksQueue()
 		loadingTasks = ARApplication.getInjector().provideLoadingTasksQueue()
-		fileRepository = ARApplication.getInjector().provideFileRepository()
-		localRepository = ARApplication.getInjector().provideLocalRepository()
+		fileRepository = ARApplication.getInjector().provideFileRepository(applicationContext)
+		localRepository = ARApplication.getInjector().provideLocalRepository(applicationContext)
 	}
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

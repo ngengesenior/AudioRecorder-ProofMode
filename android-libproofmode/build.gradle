@@ -1,6 +1,10 @@
+
+plugins {
+    id 'maven-publish'
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
-
 
 android {
     compileSdkVersion 34
@@ -65,26 +69,20 @@ dependencies {
     // Required -- JUnit 4 framework
     androidTestImplementation 'junit:junit:4.13.2'
 
-    // Testing-only dependencies
-    /*androidTestImplementation 'androidx.test:core:' + rootProject.coreVersion;
-    androidTestImplementation 'androidx.test.ext:junit:' + rootProject.extJUnitVersion;
-    androidTestImplementation 'androidx.test:runner:' + rootProject.runnerVersion;*/
-
 
 }
 
-/**
+
 project.afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
                 groupId 'org.proofmode'
                 artifactId 'android-libproofmode'
-                version '1.0.26'
+                version '1.0.29'
                 from components.release
             }
         }
     }
-}**/
-
+}
 

@@ -103,12 +103,13 @@ public class ProofMode {
         return proofFileSystem;
     }
 
+
     /**
      * The implementing file calls this method with the File system they want proof to be stored on.
      *
      * @param fileSystem: The file system used for saving proof data
      */
-    public void setProofFileSystem(File fileSystem) {
+    public static void setProofFileSystem(File fileSystem) {
         ProofMode.proofFileSystem = fileSystem;
     }
 
@@ -178,10 +179,6 @@ public class ProofMode {
 
     }
 
-    public static File getProofDir(Context context, String mediaHash) {
-        return MediaWatcher.getHashStorageDir(context, mediaHash);
-    }
-
     public static void setProofPoints(Context context, boolean deviceIds, boolean location, boolean networks, boolean notarization) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -200,18 +197,15 @@ public class ProofMode {
         MediaWatcher.getInstance(context).addNotarizationProvider(provider);
     }
 
-    public static PGPPublicKey getPublicKey(Context context, String passphrase) throws PGPException, IOException {
-        PgpUtils pu = PgpUtils.getInstance(context, passphrase);
-        PGPPublicKey pubKey = null;
-        return pubKey = pu.getPublicKey();
+    public static PGPPublicKey getPublicKey() throws PGPException, IOException {
+        PgpUtils pu = PgpUtils.getInstance();
+        return pu.getPublicKey();
 
     }
 
-    public static String getPublicKeyString(Context context, String passphrase) throws IOException, PGPException {
-        PgpUtils pu = PgpUtils.getInstance(context, passphrase);
-        String pubKey = pu.getPublicKeyString();
-
-        return pubKey;
+    public static String getPublicKeyString() throws IOException, PGPException {
+        PgpUtils pu = PgpUtils.getInstance();
+        return pu.getPublicKeyString();
     }
 
     public static boolean verifyProofZip(Context context, FileDescriptor proofZip) throws Exception {
@@ -373,11 +367,11 @@ public class ProofMode {
 
         PGPPublicKey pgpPublicKey = PgpUtils.getPublicKey(pubKey);
 
-        boolean proofSigVerified = ProofMode.verifySignature(context, proofFile, proofFileSig, pgpPublicKey);
+        boolean proofSigVerified = ProofMode.verifySignature(proofFile, proofFileSig, pgpPublicKey);
         if (!proofSigVerified)
             throw new ProofException("Proof json signature not valid");
 
-        boolean mediaSigVerified = ProofMode.verifySignature(context, mediaFile, mediaSig, pgpPublicKey);
+        boolean mediaSigVerified = ProofMode.verifySignature(mediaFile, mediaSig, pgpPublicKey);
         if (!mediaSigVerified)
             throw new ProofException("Media signature not valid");
 
@@ -395,13 +389,12 @@ public class ProofMode {
         return new ByteArrayInputStream(bos.toByteArray());
     }
 
-    public static boolean verifySignature(Context context, InputStream fileStream, InputStream sigStream, PGPPublicKey publicKey) throws Exception {
-        //PgpUtils.getInstance(context).
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        PgpUtils pu = PgpUtils.getInstance(context, null);
+    public static boolean verifySignature(InputStream fileStream, InputStream sigStream, PGPPublicKey publicKey) throws Exception {
+             PgpUtils pu = PgpUtils.getInstance();
         return pu.verifyDetachedSignature(fileStream, sigStream, publicKey);
     }
 
+    /**
     public static void generateProofZip(Context context, String proofHash, String passphrase) throws IOException, PGPException {
 
         File fileDirProof = ProofMode.getProofDir(context, proofHash);
@@ -455,20 +448,18 @@ public class ProofMode {
 
         out.close();
 
-    }
+    }**/
 
-    public static void checkAndGeneratePublicKeyAsync(Context context, String passphrase) {
+    public static void checkAndGeneratePublicKeyAsync() {
         Executors.newSingleThreadExecutor().execute(() -> {
             //Background work here
             String pubKey = null;
-
             try {
-                pubKey = PgpUtils.getInstance(context, passphrase).getPublicKeyFingerprint();
+                pubKey = PgpUtils.getInstance().getPublicKeyFingerprint();
             } catch (PGPException e) {
-                Timber.e(e, "error getting public key");
-            } catch (IOException e) {
-                Timber.e(e, "error getting public key");
+                throw new RuntimeException(e);
             }
+
 
         });
     }

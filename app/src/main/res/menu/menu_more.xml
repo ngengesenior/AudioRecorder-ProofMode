@@ -11,8 +11,6 @@
 		android:id="@+id/menu_share_proof"
 		android:icon="@drawable/ic_share"
 		android:title="Share Proof" />
-	<item android:id="@+id/menu_share_c2pa"
-		android:title="Share C2pa"/>
 	<item
 			android:id="@+id/menu_info"
 			android:icon="@drawable/ic_info"

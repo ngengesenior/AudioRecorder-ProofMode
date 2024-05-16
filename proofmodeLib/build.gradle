@@ -1,16 +1,17 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
     namespace 'com.proofmode.proofmodelib'
     compileSdk 34
 
+    //def mySafetyCheckKey = project.hasProperty('SAFETY_CHECK_KEY') ? project.SAFETY_CHECK_KEY:""
     defaultConfig {
         minSdk 24
         targetSdk 34
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -38,6 +39,7 @@ dependencies {
 
     //implementation 'org.witness:android-libproofmode:1.0.27'
     implementation project(":android-libproofmode")
+    implementation project(":android-opentimestamps")
 
     //add Google SafetyNet
 

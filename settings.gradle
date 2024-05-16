@@ -1,3 +1,4 @@
 include ':app'
 include ':proofmodeLib'
 include ':android-libproofmode'
+include ':android-opentimestamps'
