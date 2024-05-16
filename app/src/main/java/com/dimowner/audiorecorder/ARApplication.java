@@ -83,14 +83,10 @@ public class ARApplication extends Application {
 
 	private void initPgpKey() throws PGPException, IOException {
 		if (mPgpUtils == null) {
-			PgpUtils.init(this, mPrefs.getString(ProofModeConstants.PREFS_KEY_PASSPHRASE,ProofModeConstants.PREFS_KEY_PASSPHRASE_DEFAULT));
-			mPgpUtils = PgpUtils.getInstance();
+			var passphrase = mPrefs.getString(ProofModeConstants.PREFS_KEY_PASSPHRASE,ProofModeConstants.PREFS_KEY_PASSPHRASE_DEFAULT);
+			mPgpUtils = PgpUtils.getInstance(this,passphrase);
 		}
 	}
-
-
-
-
 
 
 	/**
@@ -107,7 +103,14 @@ public class ARApplication extends Application {
 	}
 
 	private void setC2paIdentity() throws PGPException, IOException {
-		String key = "0x" + PgpUtils.getInstance().getPublicKeyFingerprint();
+
+		try {
+			Os.setenv("TMPDIR",getCacheDir().getAbsolutePath(), true);
+		} catch (ErrnoException e) {
+			Timber.d("The temp dir was not set");
+		}
+
+		String key = "0x" + mPgpUtils.getPublicKeyFingerprint();
 		//String key = "0x" + ProofMode.getPublicKeyString();
 		String email = "info@proofmode.org";
 		String display = email.replace("@","at");
@@ -125,14 +128,18 @@ public class ARApplication extends Application {
 	public void checkAndGeneratePublicKey() {
 		Executors.newSingleThreadExecutor().execute(() -> {
 			try {
-				String pubKey = null;
 				if (PgpUtils.keyRingExists(this)) {
-					pubKey = PgpUtils.getInstance().getPublicKeyFingerprint();
+						initPgpKey();
+						setC2paIdentity();
+
 				} else {
 					String newPassphrase = generateRandomPassword(12);
 					Timber.d("checkAndGeneratePublicKey password: " + newPassphrase);
 					mPrefs.edit().putString(ProofModeConstants.PREFS_KEY_PASSPHRASE, newPassphrase).commit();
-					pubKey = PgpUtils.getInstance().getPublicKeyFingerprint();
+
+					initPgpKey();
+					setC2paIdentity();
+
 				}
 			} catch (Exception ex) {
 				Timber.e(ex,"Error getting public key");
@@ -156,38 +163,21 @@ public class ARApplication extends Application {
 	public void onCreate() {
 		if (BuildConfig.DEBUG) {
 			//Timber initialization;;;;''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''---------------------
-			Timber.plant(new Timber.DebugTree() {
+
+			/**
+			Timber.plant();**/
+			var tree = new Timber.DebugTree() {
 				@Override
 				protected String createStackElementTag(StackTraceElement element) {
 					return "AR-AR " + super.createStackElementTag(element) + ":" + element.getLineNumber();
 				}
-			});
+			};
+
+			Timber.plant(tree);
 		}
 		super.onCreate();
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		ProofModeUtils.INSTANCE.setProofPoints(this);
-		checkAndGeneratePublicKey();
-		try {
-			Os.setenv("TMPDIR",getCacheDir().getAbsolutePath(), true);
-		} catch (ErrnoException e) {
-			Timber.d("The temp dir was not set");
-		}
 
-
-
-		try {
-			initPgpKey();
-		} catch (PGPException | IOException e) {
-			Timber.e("There was an error while initializing PGP key");
-		}
-		// Generate C2pa credentials
-        try {
-            setC2paIdentity();
-        } catch (PGPException | IOException e) {
-			Timber.e("There was an error while generating C2pa credentials");
-        }
-        // Add notarization providers
-		ProofModeUtils.INSTANCE.addDefaultNotarizationProviders(this);
 		PACKAGE_NAME = getApplicationContext().getPackageName();
 		applicationHandler = new Handler(getApplicationContext().getMainLooper());
 		screenWidthDp = AndroidUtils.pxToDp(AndroidUtils.getScreenWidth(getApplicationContext()));
@@ -197,6 +187,7 @@ public class ARApplication extends Application {
 			prefs.migrateSettings();
 		}
 
+		initProofMode();
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(AUDIO_BECOMING_NOISY);
@@ -212,6 +203,14 @@ public class ARApplication extends Application {
 			Timber.e(e);
 		}
 //		FirebaseApp.initializeApp(this);
+	}
+
+	private void initProofMode () {
+		ProofModeUtils.INSTANCE.setProofPoints(this);
+		checkAndGeneratePublicKey();
+
+		// Add notarization providers
+		ProofModeUtils.INSTANCE.addDefaultNotarizationProviders(this);
 	}
 
 	@Override

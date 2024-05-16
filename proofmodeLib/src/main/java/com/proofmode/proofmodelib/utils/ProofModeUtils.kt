@@ -12,7 +12,6 @@ import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import androidx.work.Data
-import com.proofmode.proofmodelib.BuildConfig
 import com.proofmode.proofmodelib.notaries.GoogleSafetyNetNotarizationProvider
 import com.proofmode.proofmodelib.notaries.SafetyNetCheck
 import org.witness.proofmode.ProofMode
@@ -31,6 +30,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import com.proofmode.proofmodelib.BuildConfig
 
 object ProofModeUtils {
 
@@ -90,7 +90,8 @@ object ProofModeUtils {
 
             Timber.d("Adding public key")
             // Add public key
-            val pubKey = ProofMode.getPublicKeyString()
+            var password = ""
+            val pubKey = ProofMode.getPublicKeyString(context,password)
             var entry = ZipEntry("pubkey.asc")
             outStream.putNextEntry(entry)
             outStream.write(pubKey.toByteArray())

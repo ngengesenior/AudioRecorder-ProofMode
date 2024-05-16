@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -79,6 +80,7 @@ import com.dimowner.audiorecorder.util.TimeUtils;
 import com.proofmode.proofmodelib.utils.ProofModeUtils;
 
 import org.bouncycastle.openpgp.PGPException;
+import org.witness.proofmode.ProofModeConstants;
 import org.witness.proofmode.crypto.pgp.PgpUtils;
 import org.witness.proofmode.storage.StorageProvider;
 
@@ -174,10 +176,13 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     protected void onCreate(Bundle savedInstanceState) {
         colorMap = ARApplication.getInjector().provideColorMap(getApplicationContext());
         try{
-            pgpUtils = PgpUtils.getInstance();
-        } catch (PGPException ex) {
+            var mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+            var passphrase = mPrefs.getString(ProofModeConstants.PREFS_KEY_PASSPHRASE,ProofModeConstants.PREFS_KEY_PASSPHRASE_DEFAULT);
+            pgpUtils = PgpUtils.getInstance(this,passphrase);
+        } catch (Exception ex) {
             Timber.e(ex,"Error creating pgpUtils");
         }
+
         storageProvider = ARApplication.getInjector().provideStorageProvider(getApplicationContext());
 
         setTheme(colorMap.getAppThemeResource());

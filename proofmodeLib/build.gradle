@@ -16,10 +16,21 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
+    def safetyNetKey = "\"foo\""
+
+    if (project.hasProperty("safetynet_key"))
+        safetyNetKey = project.ext.safetynet_key
+
     buildTypes {
+        debug {
+            buildConfigField "String", "SAFETY_CHECK_KEY", safetyNetKey
+            resValue 'string', "SAFETY_CHECK_KEY", safetyNetKey
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "SAFETY_CHECK_KEY", safetyNetKey
+            resValue 'string', "SAFETY_CHECK_KEY", safetyNetKey
         }
     }
 
@@ -37,9 +48,10 @@ dependencies {
 
     //add the libProofMode library
 
-    //implementation 'org.witness:android-libproofmode:1.0.27'
-    implementation project(":android-libproofmode")
-    implementation project(":android-opentimestamps")
+    implementation 'org.proofmode:android-libproofmode:1.0.30'
+    implementation 'org.proofmode:android-opentimestamps:1.0.26'
+   // implementation project(":android-libproofmode")
+    //implementation project(":android-opentimestamps")
 
     //add Google SafetyNet
 
