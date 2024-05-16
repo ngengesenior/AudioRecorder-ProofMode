@@ -21,7 +21,7 @@ import timber.log.Timber;
 
 public class GoogleSafetyNetNotarizationProvider implements NotarizationProvider {
 
-    private Context mContext;
+    private final Context mContext;
 
     public GoogleSafetyNetNotarizationProvider (Context context)
     {

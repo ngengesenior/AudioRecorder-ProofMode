@@ -152,7 +152,7 @@ dependencies {
 	//add the libProofMode library
 
 	implementation 'org.proofmode:android-libproofmode:1.0.30'
-	implementation 'org.proofmode:android-opentimestamps:1.0.26'
+	implementation 'org.proofmode:android-opentimestamps:1.0.27'
 	// implementation project(":android-libproofmode")
 	//implementation project(":android-opentimestamps")
 
