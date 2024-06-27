@@ -12,6 +12,10 @@
 		android:icon="@drawable/ic_share"
 		android:title="Share Proof" />
 	<item
+		android:id="@+id/menu_save_proof"
+		android:icon="@drawable/file_download"
+		android:title="Save Proof" />
+	<item
 			android:id="@+id/menu_info"
 			android:icon="@drawable/ic_info"
 			android:title="@string/info" />

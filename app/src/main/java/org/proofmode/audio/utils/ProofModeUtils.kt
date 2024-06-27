@@ -1,9 +1,13 @@
 package org.proofmode.audio.utils
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -21,6 +25,7 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.zip.ZipEntry
@@ -40,34 +45,47 @@ object ProofModeUtils {
     fun getStorageProvider(context: Context): StorageProvider {
         return DefaultStorageProvider(context.applicationContext)
     }
-    /*fun makeProofZip(proofDirPath: File, context: Context): File {
-        val files = proofDirPath.listFiles()
-        Timber.d("makeProofZip: files.size = ${files.size}")
-        val outputZipFile = File(context.filesDir, "proofmode-audio-recorder${proofDirPath.name}.zip")
-        ZipOutputStream(BufferedOutputStream(FileOutputStream(outputZipFile))).use { zos ->
-            proofDirPath.walkTopDown().forEach { file ->
-                val zipFileName =
-                        file.absolutePath.removePrefix(proofDirPath.absolutePath).removePrefix("/")
-                val entry = ZipEntry("$zipFileName${(if (file.isDirectory) "/" else "")}")
-                zos.putNextEntry(entry)
-                if (file.isFile) {
-                    file.inputStream().copyTo(zos)
-                }
-            }
-            val keyEntry = ZipEntry("pubkey.asc");
-            zos.putNextEntry(keyEntry);
-            val publicKey = getPublicKeyFingerprint()
-            zos.write(publicKey.toByteArray())
+    fun createZipFileFromUris(context: Context,uris: List<Uri>, outputZipFile: File){
+        createZipFileWithOutputStream(context,uris,FileOutputStream(outputZipFile))
 
+    }
+
+    fun createZipFileInDownloads(context: Context, uris: List<Uri>, fileName: String): Uri? {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.MIME_TYPE, "application/zip")
+            put(MediaStore.Downloads.IS_PENDING, 1)
         }
 
-        return outputZipFile
-    }*/
-    fun createZipFileFromUris(context: Context,uris: List<Uri>, outputZipFile: File) {
+        val resolver = context.contentResolver
+        val destinationUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        } else {
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val file = File(downloadsDir, fileName)
+            FileProvider.getUriForFile(context, "${context.applicationContext.packageName}.app_file_provider", file)
+        }
+
+        destinationUri?.let { uri ->
+            resolver.openOutputStream(uri)?.use { outputStream ->
+                createZipFileWithOutputStream(context, uris, outputStream)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    contentValues.clear()
+                    contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
+                    resolver.update(uri, contentValues, null, null)
+                }
+            }
+        }
+
+        return destinationUri
+    }
+
+    private fun createZipFileWithOutputStream(context: Context, uris: List<Uri>, outputStream: OutputStream) {
         val bufferSize = 8192
         val buffer = ByteArray(bufferSize)
 
-        ZipOutputStream(BufferedOutputStream(FileOutputStream(outputZipFile))).use { outStream ->
+        ZipOutputStream(BufferedOutputStream(outputStream)).use { outStream ->
             uris.forEach { uri ->
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
                     BufferedInputStream(inputStream, bufferSize).use { bufferedInputStream ->
@@ -84,22 +102,24 @@ object ProofModeUtils {
 
             Timber.d("Adding public key")
             // Add public key
-            var password = ""
-            val pubKey = ProofMode.getPublicKeyString(context,password)
+            val password = ""
+            val pubKey = ProofMode.getPublicKeyString(context, password)
             var entry = ZipEntry("pubkey.asc")
             outStream.putNextEntry(entry)
             outStream.write(pubKey.toByteArray())
+
             Timber.d("Adding HowToVerifyProofData.txt")
             val howToFile = "HowToVerifyProofData.txt"
             entry = ZipEntry(howToFile)
             outStream.putNextEntry(entry)
-            val `is` = context.applicationContext.resources.assets.open(howToFile)
-            var length = `is`.read(buffer)
-            while (length != -1) {
-                outStream.write(buffer, 0, length)
-                length = `is`.read(buffer)
+            context.assets.open(howToFile).use { inputStream ->
+                var length = inputStream.read(buffer)
+                while (length != -1) {
+                    outStream.write(buffer, 0, length)
+                    length = inputStream.read(buffer)
+                }
             }
-            `is`.close()
+
             Timber.d("Zip complete")
         }
     }

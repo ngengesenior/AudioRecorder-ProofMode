@@ -107,6 +107,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     public static final int REQ_CODE_READ_EXTERNAL_STORAGE_DOWNLOAD = 407;
     public static final int REQ_CODE_IMPORT_AUDIO = 11;
     public static final int REQ_CODE_POST_NOTIFICATIONS = 111;
+    public static final int REQ_SAVE_FILE_ZIP = 500;
 
     private WaveformViewNew waveformView;
     private RecordingWaveformView recordingWaveformView;
@@ -751,18 +752,58 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     @Override
     public void shareRecordProof(Record record) {
 
+        try {
+            File proofZip = createProofZip(record);
+            ProofModeUtils.INSTANCE.shareZipFile(this,proofZip,getApplicationContext().getPackageName());
+        }catch (Exception ex) {
+            Toast.makeText(this,"There was an error sharing proof",Toast.LENGTH_LONG).show();
+        }
+
+
+    }
+
+    @Override
+    public void saveRecordProofZip(Record record) {
+        saveProofZip(record);
+    }
+
+    public void saveProofZip(Record record){
+        String name = record.getName() +"-proof-"  + ProofModeUtils.INSTANCE.getDateFormat().format(new Date()) + ".zip";
+        Toast.makeText(this,"Saving proof to local storage:"+name,Toast.LENGTH_LONG).show();
         Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
         String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
         if (hash != null) {
             var proofSet = storageProvider.getProofSet(hash);
             proofSet.add(contentUri);
-            File file = new File(getFilesDir(),record.getName() +"-proof-"  + ProofModeUtils.INSTANCE.getDateFormat().format(new Date()) + ".zip");
-            ProofModeUtils.INSTANCE.createZipFileFromUris(getApplicationContext(),proofSet,file);
-            ProofModeUtils.INSTANCE.shareZipFile(this,file,getApplicationContext().getPackageName());
-        } else {
-            Toast.makeText(this, "No hash found", Toast.LENGTH_SHORT).show();
+            Uri uri = ProofModeUtils.INSTANCE.createZipFileInDownloads(this,proofSet,name);
+            if (uri != null) {
+                Toast.makeText(this,"Proof saved to storage:"+ uri.getPath(),Toast.LENGTH_SHORT)
+                        .show();
+            } else  {
+                Toast.makeText(this,"Proof failed to save to storage:",Toast.LENGTH_SHORT)
+                        .show();
+            }
+        } else  {
+            Toast.makeText(this,"Error Saving proof to local storage:"+name,Toast.LENGTH_LONG).show();
+
         }
 
+    }
+
+    private File createProofZip(Record record) {
+        Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(record.getPath()), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+        String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
+        File file;
+        if (hash != null) {
+            var proofSet = storageProvider.getProofSet(hash);
+            proofSet.add(contentUri);
+            file = new File(getFilesDir(),record.getName() +"-proof-"  + ProofModeUtils.INSTANCE.getDateFormat().format(new Date()) + ".zip");
+            ProofModeUtils.INSTANCE.createZipFileFromUris(getApplicationContext(),proofSet,file);
+        } else {
+            throw new RuntimeException("Could not create proof zip");
+            //Toast.makeText(this, "No hash found", Toast.LENGTH_SHORT).show();
+        }
+        return file;
     }
 
     @Override
@@ -873,6 +914,8 @@ public class MainActivity extends Activity implements MainContract.View, View.On
                 presenter.onDeleteClick();
             } else if (id == R.id.menu_share_proof) {
                 presenter.onShareRecordProofClick();
+            } else if(id == R.id.menu_save_proof){
+                presenter.onSaveRecordProofZip();
             }
             /*else if(id == R.id.menu_share_c2pa ) {
                 presenter.onShareC2paClick();
@@ -901,7 +944,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 
 
     private boolean checkStoragePermissionDownload() {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                     && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
@@ -917,7 +960,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 
     private boolean checkStoragePermissionImport() {
         if (presenter.isStorePublic()) {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                         && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(
@@ -933,7 +976,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     }
 
     private boolean checkStoragePermissionPlayback() {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                     && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
@@ -948,7 +991,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
     }
 
     private boolean checkRecordPermission2() {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_CODE_RECORD_AUDIO);
                 return false;
@@ -959,7 +1002,7 @@ public class MainActivity extends Activity implements MainContract.View, View.On
 
     private boolean checkStoragePermission2() {
         if (presenter.isStorePublic()) {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     AndroidUtils.showDialog(this, R.string.warning, R.string.need_write_permission,
                             v -> requestPermissions(
