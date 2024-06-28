@@ -642,6 +642,13 @@ public class MainPresenter implements MainContract.UserActionsListener {
         }
     }
 
+    @Override
+    public void onSaveRecordProofZip() {
+        if (view != null && record != null) {
+            view.saveRecordProofZip(record);
+        }
+    }
+
     /*@Override
     public void onShareC2paClick() {
         if (view != null && record != null) {
