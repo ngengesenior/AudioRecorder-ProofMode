@@ -273,6 +273,12 @@ public class RecordsActivity extends Activity implements RecordsContract.View, V
 				
 				shareProof(item.getPath(),item.getName());
 			}
+			else if (menuId == R.id.menu_save_proof) {
+				saveProof(item.getPath(),item.getName());
+
+				//shareProof(item.getPath(),item.getName());
+
+			}
 			else if (menuId == R.id.menu_info) {
 				presenter.onRecordInfo(Mapper.toRecordInfo(item));
 			} else if (menuId == R.id.menu_rename) {
@@ -370,6 +376,33 @@ public class RecordsActivity extends Activity implements RecordsContract.View, V
 			ProofModeUtils.INSTANCE.shareZipFile(this,file,getApplicationContext().getPackageName());
 		} else {
 			Toast.makeText(this, "No hash found", Toast.LENGTH_SHORT).show();
+		}
+
+	}
+
+	public void saveProof(String path, String recordName) {
+
+		String name = recordName +"-proof-"  + ProofModeUtils.INSTANCE.getDateFormat().format(new Date()) + ".zip";
+		Toast.makeText(this,"Saving proof to local storage:"+name,Toast.LENGTH_LONG).show();
+		var storageProvider = ARApplication.getInjector().provideStorageProvider(getApplicationContext());
+
+		Uri contentUri = ProofModeUtils.INSTANCE.getUriForFile(new File(path), this, getApplicationContext().getPackageName()); //Uri.fromFile(new File(record.getPath()));
+		String hash = ProofModeUtils.INSTANCE.proofExistsForMedia(getApplicationContext(), contentUri);
+
+		if (hash != null) {
+			var proofSet = storageProvider.getProofSet(hash);
+			proofSet.add(contentUri);
+			Uri uri = ProofModeUtils.INSTANCE.createZipFileInDownloads(this,proofSet,name);
+			if (uri != null) {
+				Toast.makeText(this,"Proof saved to storage:"+ uri.getPath(),Toast.LENGTH_SHORT)
+						.show();
+			} else  {
+				Toast.makeText(this,"Proof failed to save to storage:",Toast.LENGTH_SHORT)
+						.show();
+			}
+		} else  {
+			Toast.makeText(this,"Error Saving proof to local storage:"+name,Toast.LENGTH_LONG).show();
+
 		}
 
 	}
