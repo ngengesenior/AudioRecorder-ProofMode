@@ -56,6 +56,8 @@ import com.dimowner.audiorecorder.data.database.TrashDataSource;
 
 public class Injector {
 
+	private final Context context;
+
 	private BackgroundQueue loadingTasks;
 	private BackgroundQueue recordingTasks;
 	private BackgroundQueue importTasks;
@@ -75,29 +77,33 @@ public class Injector {
 
 	private AudioPlayerNew audioPlayer = null;
 
-	public Prefs providePrefs(Context context) {
+	public Injector(Context context) {
+		this.context = context;
+	}
+
+	public Prefs providePrefs() {
 		return PrefsImpl.getInstance(context);
 	}
 
-	public RecordsDataSource provideRecordsDataSource(Context context) {
+	public RecordsDataSource provideRecordsDataSource() {
 		return RecordsDataSource.getInstance(context);
 	}
 
-	public TrashDataSource provideTrashDataSource(Context context) {
+	public TrashDataSource provideTrashDataSource() {
 		return TrashDataSource.getInstance(context);
 	}
 
-	public FileRepository provideFileRepository(Context context) {
-		return FileRepositoryImpl.getInstance(context, providePrefs(context));
+	public FileRepository provideFileRepository() {
+		return FileRepositoryImpl.getInstance(context, providePrefs());
 	}
 
-	public LocalRepository provideLocalRepository(Context context) {
-		return LocalRepositoryImpl.getInstance(provideRecordsDataSource(context), provideTrashDataSource(context), provideFileRepository(context), providePrefs(context));
+	public LocalRepository provideLocalRepository() {
+		return LocalRepositoryImpl.getInstance(provideRecordsDataSource(), provideTrashDataSource(), provideFileRepository(), providePrefs());
 	}
 
-	public AppRecorder provideAppRecorder(Context context) {
-		return AppRecorderImpl.getInstance(provideAudioRecorder(context), provideLocalRepository(context),
-				provideLoadingTasksQueue(), provideRecordDataSource(context));
+	public AppRecorder provideAppRecorder() {
+		return AppRecorderImpl.getInstance(provideAudioRecorder(), provideLocalRepository(),
+				provideLoadingTasksQueue(), provideRecordDataSource());
 	}
 
 	public AudioWaveformVisualization provideAudioWaveformVisualization() {
@@ -139,11 +145,11 @@ public class Injector {
 		return copyTasks;
 	}
 
-	public ColorMap provideColorMap(Context context) {
-		return ColorMap.getInstance(providePrefs(context));
+	public ColorMap provideColorMap() {
+		return ColorMap.getInstance(providePrefs());
 	}
 
-	public SettingsMapper provideSettingsMapper(Context context) {
+	public SettingsMapper provideSettingsMapper() {
 		return SettingsMapper.getInstance(context);
 	}
 
@@ -158,8 +164,8 @@ public class Injector {
 		return audioPlayer;
 	}
 
-	public RecorderContract.Recorder provideAudioRecorder(Context context) {
-		switch (providePrefs(context).getSettingRecordingFormat()) {
+	public RecorderContract.Recorder provideAudioRecorder() {
+		switch (providePrefs().getSettingRecordingFormat()) {
 			default:
 			case AppConstants.FORMAT_M4A:
 				return AudioRecorder.getInstance();
@@ -170,88 +176,89 @@ public class Injector {
 		}
 	}
 
-	public RecordDataSource provideRecordDataSource(Context context) {
+	public RecordDataSource provideRecordDataSource() {
 		if (recordDataSource == null) {
 			recordDataSource = new RecordDataSource(
-					provideLocalRepository(context),
-					providePrefs(context)
+					provideLocalRepository(),
+					providePrefs()
 			);
 		}
 		return recordDataSource;
 	}
 
-	public MainContract.UserActionsListener provideMainPresenter(Context context) {
+	public MainContract.UserActionsListener provideMainPresenter() {
 		if (mainPresenter == null) {
-			mainPresenter = new MainPresenter(providePrefs(context), provideFileRepository(context),
-					provideLocalRepository(context), provideAudioPlayer(), provideAppRecorder(context),
+			mainPresenter = new MainPresenter(providePrefs(), provideFileRepository(),
+					provideLocalRepository(), provideAudioPlayer(), provideAppRecorder(),
 					provideRecordingTasksQueue(), provideLoadingTasksQueue(), provideProcessingTasksQueue(),
-					provideImportTasksQueue(), provideSettingsMapper(context), provideRecordDataSource(context));
+					provideImportTasksQueue(), provideSettingsMapper(), provideRecordDataSource(),
+					context);
 		}
 		return mainPresenter;
 	}
 
-	public RecordsContract.UserActionsListener provideRecordsPresenter(Context context) {
+	public RecordsContract.UserActionsListener provideRecordsPresenter() {
 		if (recordsPresenter == null) {
-			recordsPresenter = new RecordsPresenter(provideLocalRepository(context), provideFileRepository(context),
+			recordsPresenter = new RecordsPresenter(provideLocalRepository(), provideFileRepository(),
 					provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideAudioPlayer(), provideAppRecorder(context), providePrefs(context));
+					provideAudioPlayer(), provideAppRecorder(), providePrefs());
 		}
 		return recordsPresenter;
 	}
 
-	public SettingsContract.UserActionsListener provideSettingsPresenter(Context context) {
+	public SettingsContract.UserActionsListener provideSettingsPresenter() {
 		if (settingsPresenter == null) {
-			settingsPresenter = new SettingsPresenter(provideLocalRepository(context), provideFileRepository(context),
-					provideRecordingTasksQueue(), provideLoadingTasksQueue(), providePrefs(context),
-					provideSettingsMapper(context), provideAppRecorder(context));
+			settingsPresenter = new SettingsPresenter(provideLocalRepository(), provideFileRepository(),
+					provideRecordingTasksQueue(), provideLoadingTasksQueue(), providePrefs(),
+					provideSettingsMapper(), provideAppRecorder());
 		}
 		return settingsPresenter;
 	}
 
-	public TrashContract.UserActionsListener provideTrashPresenter(Context context) {
+	public TrashContract.UserActionsListener provideTrashPresenter() {
 		if (trashPresenter == null) {
 			trashPresenter = new TrashPresenter(provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideFileRepository(context), provideLocalRepository(context));
+					provideFileRepository(), provideLocalRepository());
 		}
 		return trashPresenter;
 	}
 
-	public SetupContract.UserActionsListener provideSetupPresenter(Context context) {
+	public SetupContract.UserActionsListener provideSetupPresenter() {
 		if (setupPresenter == null) {
-			setupPresenter = new SetupPresenter(providePrefs(context));
+			setupPresenter = new SetupPresenter(providePrefs());
 		}
 		return setupPresenter;
 	}
 
 	@SuppressLint("UnsafeOptInUsageWarning")
-	public MoveRecordsViewModel provideMoveRecordsViewModel(Context context) {
+	public MoveRecordsViewModel provideMoveRecordsViewModel() {
 		if (moveRecordsViewModel == null) {
 			moveRecordsViewModel = new MoveRecordsViewModel(
 					provideLoadingTasksQueue(),
-					provideLocalRepository(context),
-					provideFileRepository(context),
-					provideSettingsMapper(context),
+					provideLocalRepository(),
+					provideFileRepository(),
+					provideSettingsMapper(),
 					provideAudioPlayer(),
-					provideAppRecorder(context),
-					providePrefs(context)
+					provideAppRecorder(),
+					providePrefs()
 			);
 		}
 		return moveRecordsViewModel;
 	}
 
-	public LostRecordsContract.UserActionsListener provideLostRecordsPresenter(Context context) {
+	public LostRecordsContract.UserActionsListener provideLostRecordsPresenter() {
 		if (lostRecordsPresenter == null) {
 			lostRecordsPresenter = new LostRecordsPresenter(provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideLocalRepository(context), providePrefs(context));
+					provideLocalRepository(), providePrefs());
 		}
 		return lostRecordsPresenter;
 	}
 
-	public FileBrowserContract.UserActionsListener provideFileBrowserPresenter(Context context) {
+	public FileBrowserContract.UserActionsListener provideFileBrowserPresenter() {
 		if (fileBrowserPresenter == null) {
-			fileBrowserPresenter = new FileBrowserPresenter(providePrefs(context), provideAppRecorder(context), provideImportTasksQueue(),
+			fileBrowserPresenter = new FileBrowserPresenter(providePrefs(), provideAppRecorder(), provideImportTasksQueue(),
 					provideLoadingTasksQueue(), provideRecordingTasksQueue(),
-					provideLocalRepository(context), provideFileRepository(context));
+					provideLocalRepository(), provideFileRepository());
 		}
 		return fileBrowserPresenter;
 	}

@@ -94,10 +94,10 @@ class DecodeService : Service() {
 
 	override fun onCreate() {
 		super.onCreate()
-		colorMap = ARApplication.injector.provideColorMap(applicationContext)
+		colorMap = ARApplication.injector.provideColorMap()
 		processingTasks = ARApplication.injector.provideProcessingTasksQueue()
 		recordingsTasks = ARApplication.injector.provideRecordingTasksQueue()
-		localRepository = ARApplication.injector.provideLocalRepository(applicationContext)
+		localRepository = ARApplication.injector.provideLocalRepository()
 		waveformVisualization = ARApplication.injector.provideAudioWaveformVisualization()
 	}
 

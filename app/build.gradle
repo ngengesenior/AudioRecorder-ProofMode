@@ -106,8 +106,8 @@ dependencies {
 	implementation "com.jakewharton.timber:timber:$timber"
 	implementation "androidx.recyclerview:recyclerview:$androidX"
 	//new C2PA content authenticity support
-	api ("info.guardianproject:simple_c2pa:$simple_c2pa")
-	api ("net.java.dev.jna:jna:5.13.0@aar")
+	implementation ("info.guardianproject:simple_c2pa:$simple_c2pa")
+	implementation ("net.java.dev.jna:jna:5.13.0@aar")
 
 
 

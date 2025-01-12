@@ -56,7 +56,7 @@ class ARApplication : Application() {
                 applicationContext
             )
         )
-        val prefs = injector.providePrefs(applicationContext)
+        val prefs = injector.providePrefs()
         if (!prefs.isMigratedSettings) {
             prefs.migrateSettings()
         }
@@ -144,7 +144,7 @@ class ARApplication : Application() {
     private class RebootReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_REBOOT || intent?.action == Intent.ACTION_SHUTDOWN) {
-                val appRecorder = injector.provideAppRecorder(context)
+                val appRecorder = injector.provideAppRecorder()
                 val audioPlayer = injector.provideAudioPlayer()
                 appRecorder.stopRecording()
                 audioPlayer.stop()
