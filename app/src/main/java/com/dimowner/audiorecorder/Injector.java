@@ -185,7 +185,7 @@ public class Injector {
 			mainPresenter = new MainPresenter(providePrefs(context), provideFileRepository(context),
 					provideLocalRepository(context), provideAudioPlayer(), provideAppRecorder(context),
 					provideRecordingTasksQueue(), provideLoadingTasksQueue(), provideProcessingTasksQueue(),
-					provideImportTasksQueue(), provideSettingsMapper(context), provideRecordDataSource(context));
+					provideImportTasksQueue(), provideSettingsMapper(context), provideRecordDataSource(context),context);
 		}
 		return mainPresenter;
 	}

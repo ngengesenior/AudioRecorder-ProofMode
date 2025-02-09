@@ -86,6 +86,32 @@
 					android:textSize="@dimen/text_normal"
 					android:text="@string/view" />
 		</LinearLayout>
+		<LinearLayout
+			android:id="@+id/proofPointsSettings"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical">
+
+			<TextView
+				style="@style/Text.NormalLabel"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="2"
+				android:paddingStart="@dimen/spacing_normal"
+				android:paddingTop="@dimen/spacing_medium"
+				android:paddingEnd="@dimen/spacing_normal"
+				android:paddingBottom="@dimen/spacing_medium"
+				android:text="@string/proof_mode_data_associated_option" />
+
+			<ImageView
+				android:layout_width="wrap_content"
+				android:tint="@android:color/white"
+				android:layout_height="wrap_content"
+				android:paddingEnd="@dimen/spacing_xsmall"
+				android:src="@drawable/outline_arrow_forward" />
+
+
+		</LinearLayout>
 
 		<TextView
 				android:id="@+id/btnTrash"

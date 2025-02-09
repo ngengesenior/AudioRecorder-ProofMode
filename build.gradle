@@ -19,6 +19,10 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://raw.githubusercontent.com/guardianproject/gpmaven/master" }
+        maven {
+            url 'https://gitlab.com/api/v4/projects/51891540/packages/maven'
+        }
     }
 }
 

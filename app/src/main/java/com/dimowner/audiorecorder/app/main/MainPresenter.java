@@ -35,6 +35,7 @@ import com.dimowner.audiorecorder.app.settings.SettingsMapper;
 import com.dimowner.audiorecorder.audio.AudioDecoder;
 import com.dimowner.audiorecorder.audio.player.PlayerContractNew;
 import com.dimowner.audiorecorder.audio.recorder.RecorderContract;
+import com.dimowner.audiorecorder.c2pa.C2paUtils;
 import com.dimowner.audiorecorder.data.RecordDataSource;
 import com.dimowner.audiorecorder.data.FileRepository;
 import com.dimowner.audiorecorder.data.Prefs;
@@ -50,6 +51,7 @@ import com.dimowner.audiorecorder.util.TimeUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +61,7 @@ import timber.log.Timber;
 public class MainPresenter implements MainContract.UserActionsListener {
 
 	private MainContract.View view;
+	private Record record;
 	private final AppRecorder appRecorder;
 	private final PlayerContractNew.Player audioPlayer;
 	private PlayerContractNew.PlayerCallback playerCallback;
@@ -78,6 +81,7 @@ public class MainPresenter implements MainContract.UserActionsListener {
 	/** Flag true defines that presenter called to show import progress when view was not bind.
 	 * And after view bind we need to show import progress.*/
 	private boolean showImportProgress = false;
+	private final WeakReference<Context> contextRef;
 
 	public MainPresenter(final Prefs prefs, final FileRepository fileRepository,
 						 final LocalRepository localRepository,
@@ -88,7 +92,8 @@ public class MainPresenter implements MainContract.UserActionsListener {
 						 final BackgroundQueue processingTasks,
 						 final BackgroundQueue importTasks,
 						 SettingsMapper settingsMapper,
-						 RecordDataSource recordDataSource
+						 RecordDataSource recordDataSource,
+						 Context context
 						 ) {
 		this.prefs = prefs;
 		this.fileRepository = fileRepository;
@@ -101,6 +106,7 @@ public class MainPresenter implements MainContract.UserActionsListener {
 		this.appRecorder = appRecorder;
 		this.settingsMapper = settingsMapper;
 		this.recordDataSource = recordDataSource;
+		this.contextRef = new WeakReference<>(context.getApplicationContext());
 	}
 
 	@Override
@@ -160,6 +166,7 @@ public class MainPresenter implements MainContract.UserActionsListener {
 						}
 					}
 					prefs.setActiveRecord(rec.getId());
+					record = rec;
 					songDuration = rec.getDuration();
 					if (view != null) {
 						view.showWaveForm(rec.getAmps(), songDuration, 0);
@@ -168,6 +175,7 @@ public class MainPresenter implements MainContract.UserActionsListener {
 						view.showOptionsMenu();
 					}
 					updateInformation(rec.getFormat(), rec.getSampleRate(), rec.getSize());
+					generateContentCredentials(record);
 					if (view != null) {
 						view.keepScreenOn(false);
 						view.hideProgress();
@@ -922,5 +930,13 @@ public class MainPresenter implements MainContract.UserActionsListener {
 			}
 		}
 		return null;
+	}
+
+	private void generateContentCredentials(Record record) {
+		Context appCtx = contextRef.get().getApplicationContext();
+		C2paUtils.Companion.generateContentCredentials(appCtx,
+				record.getPath(),
+				true,
+				false);
 	}
 }

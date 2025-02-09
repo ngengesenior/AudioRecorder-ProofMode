@@ -86,5 +86,6 @@
 	<color name="md_blue_gray_500">#253343</color>
 
 	<color name="transparent">#00000000</color>
+	<color name="onboarding_gray_light">#737373</color>
 
 </resources>

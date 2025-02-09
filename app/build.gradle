@@ -95,6 +95,7 @@ dependencies {
 	def androidX = "1.3.2"
 	def coroutines = "1.8.0"
 	def timber = "5.0.1"
+	def simple_c2pa = "0.0.15"
 
 	//Kotlin
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -104,6 +105,15 @@ dependencies {
 	//Timber
 	implementation "com.jakewharton.timber:timber:$timber"
 	implementation "androidx.recyclerview:recyclerview:$androidX"
+	//new C2PA content authenticity support
+	implementation ("info.guardianproject:simple_c2pa:$simple_c2pa")
+	implementation ("net.java.dev.jna:jna:5.13.0@aar")
+	implementation "androidx.core:core-ktx:1.12.0"
+	implementation 'androidx.preference:preference-ktx:1.2.1'
+
+	implementation 'org.bouncycastle:bcpkix-jdk15to18:1.72'
+	implementation 'org.bouncycastle:bcprov-jdk15to18:1.72'
+	implementation 'org.bouncycastle:bcpg-jdk15to18:1.71'
 
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("io.mockk:mockk:1.13.10")

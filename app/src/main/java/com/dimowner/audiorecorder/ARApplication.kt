@@ -23,18 +23,35 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
+import com.dimowner.audiorecorder.app.proofmode.ProofModeUtils
+import com.dimowner.audiorecorder.app.proofmode.ProofModeUtils.PREFS_KEY_PASSPHRASE
+import com.dimowner.audiorecorder.c2pa.C2paUtils
+import com.dimowner.audiorecorder.pgp.PgpUtils
 import com.dimowner.audiorecorder.util.AndroidUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.openpgp.PGPException
 import timber.log.Timber
 import timber.log.Timber.DebugTree
+import java.io.IOException
+import java.security.Security
+import java.util.concurrent.Executors
+import kotlin.random.Random
 
 
 //import com.google.firebase.FirebaseApp;
@@ -42,6 +59,106 @@ class ARApplication : Application() {
 
     private var audioOutputChangeReceiver: AudioOutputChangeReceiver? = null
     private var rebootReceiver: RebootReceiver? = null
+    private var mPgpUtils:PgpUtils? = null
+    private val mPrefs: SharedPreferences by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
+
+    fun initPgpKey(){
+        if (mPgpUtils == null) {
+            PgpUtils.init(this,mPrefs.getString(ProofModeUtils.PREFS_KEY_PASSPHRASE,ProofModeUtils.PREFS_PASSPHRASE_DEFAULT))
+            mPgpUtils = PgpUtils.getInstance()
+            initContentCredentials()
+
+        }
+    }
+
+    fun initContentCredentials () {
+        val email = "info@proofmode.org"
+        var display : String? = null
+        var key : String? = "0x" + mPgpUtils?.publicKeyFingerprint
+        var uri : String? = null
+
+        if (email?.isNotEmpty() == true)
+        {
+            display = "${email.replace("@"," at ")}"
+        }
+
+        uri =
+            "https://keys.openpgp.org/search?q=" + mPgpUtils?.publicKeyFingerprint
+
+        C2paUtils.init(this)
+        C2paUtils.setC2PAIdentity(display, uri, email, key)
+        if (key != null) {
+            C2paUtils.initCredentials(this, email, key)
+        }
+    }
+
+    fun checkAndGeneratePublicKey() {
+        Executors.newSingleThreadExecutor().execute {
+
+            //Background work here
+            var pubKey: String? = null
+            try {
+                val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+                if (PgpUtils.keyRingExists(this)) {
+                    pubKey = mPgpUtils?.publicKeyFingerprint
+                }
+                else
+                {
+                    var newPassPhrase = getRandPassword(12)
+                    prefs.edit().putString(PREFS_KEY_PASSPHRASE,newPassPhrase).commit()
+
+
+                    var accountEmail = "info@proofmode.org" //prefs.getString(ProofMode.PREF_CREDENTIALS_PRIMARY, "")
+                    if (accountEmail?.isNotEmpty() == true) {
+                        PgpUtils.setKeyid(accountEmail)
+                    }
+
+                    pubKey = mPgpUtils?.publicKeyFingerprint
+
+                }
+
+            } catch (e: PGPException) {
+                Timber.e(e, "error getting public key")
+                showToastMessage("Error generating key")
+            } catch (e: IOException) {
+                Timber.e(e, "error getting public key")
+                showToastMessage("Error generating key")
+            }
+        }
+    }
+
+    private fun showToastMessage(message: String) {
+        val handler = Handler(Looper.getMainLooper())
+        handler.post {
+            //UI Thread work here
+            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+
+
+
+    fun getRandPassword(n: Int): String
+    {
+        val characterSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        val random = Random(System.nanoTime())
+        val password = StringBuilder()
+
+        for (i in 0 until n)
+        {
+            val rIndex = random.nextInt(characterSet.length)
+            password.append(characterSet[rIndex])
+        }
+
+        return password.toString()
+    }
+
+
+
+
+
 
     override fun onCreate() {
         if (BuildConfig.DEBUG) {
@@ -56,6 +173,10 @@ class ARApplication : Application() {
                 applicationContext
             )
         )
+        checkAndGeneratePublicKey()
+        CoroutineScope(Dispatchers.IO).launch {
+            initPgpKey()
+        }
         val prefs = injector.providePrefs(applicationContext)
         if (!prefs.isMigratedSettings) {
             prefs.migrateSettings()
@@ -169,6 +290,7 @@ class ARApplication : Application() {
 
     companion object {
         private var PACKAGE_NAME: String? = null
+        @JvmStatic val provider = BouncyCastleProvider()
 
         @JvmField
 		@Volatile
@@ -200,5 +322,10 @@ class ARApplication : Application() {
         @JvmStatic
 		val longWaveformSampleCount: Int
             get() = (AppConstants.WAVEFORM_WIDTH * screenWidthDp).toInt()
+
+
+        init {
+            Security.addProvider(provider)
+        }
     }
 }

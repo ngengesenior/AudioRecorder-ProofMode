@@ -43,6 +43,7 @@ import com.dimowner.audiorecorder.ColorMap;
 import com.dimowner.audiorecorder.R;
 import com.dimowner.audiorecorder.app.browser.FileBrowserActivity;
 import com.dimowner.audiorecorder.app.moverecords.MoveRecordsActivity;
+import com.dimowner.audiorecorder.app.proofmode.ProofModeSettingsActivity;
 import com.dimowner.audiorecorder.app.trash.TrashActivity;
 import com.dimowner.audiorecorder.app.widget.SettingView;
 import com.dimowner.audiorecorder.util.AndroidUtils;
@@ -86,6 +87,7 @@ public class SettingsActivity extends Activity implements SettingsContract.View,
 	private SettingsContract.UserActionsListener presenter;
 	private ColorMap colorMap;
 	private ColorMap.OnThemeColorChangeListener onThemeColorChangeListener;
+	private LinearLayout proofSettingsView;
 	private final CompoundButton.OnCheckedChangeListener publicDirListener = new CompoundButton.OnCheckedChangeListener() {
 		@Override
 		public void onCheckedChanged(CompoundButton btn, boolean isChecked) {
@@ -121,6 +123,7 @@ public class SettingsActivity extends Activity implements SettingsContract.View,
 		setContentView(R.layout.activity_settings);
 
 		btnView = findViewById(R.id.btnView);
+		proofSettingsView = findViewById(R.id.proofPointsSettings);
 
 		btnView.setBackground(RippleUtils.createRippleShape(
 				ContextCompat.getColor(getApplicationContext(), R.color.white_transparent_80),
@@ -128,6 +131,7 @@ public class SettingsActivity extends Activity implements SettingsContract.View,
 				getApplicationContext().getResources().getDimension(R.dimen.spacing_normal)
 		));
 		btnView.setOnClickListener(this);
+		proofSettingsView.setOnClickListener(this);
 		btnReset = findViewById(R.id.btnReset);
 		btnReset.setOnClickListener(this);
 		txtSizePerMin = findViewById(R.id.txt_size_per_min);
@@ -347,6 +351,8 @@ public class SettingsActivity extends Activity implements SettingsContract.View,
 			presenter.loadSettings();
 		} else if (id == R.id.btnRequest) {
 			requestFeature();
+		} else if (id == R.id.proofPointsSettings) {
+			startActivity(new Intent(this, ProofModeSettingsActivity.class));
 		}
 	}
 
