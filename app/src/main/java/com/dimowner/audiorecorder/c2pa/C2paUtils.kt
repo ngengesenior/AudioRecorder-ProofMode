@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.system.Os
-import android.util.Log
-import android.widget.Toast
 import info.guardianproject.simple_c2pa.ApplicationInfo
 import info.guardianproject.simple_c2pa.Certificate
 import info.guardianproject.simple_c2pa.CertificateOptions
@@ -97,10 +95,8 @@ class C2paUtils {
                     allowMachineLearning,
                     fileMedia,
                 )
-                Toast.makeText(context,"File exists and credentials added",Toast.LENGTH_LONG).show()
 
-            } else {
-                Toast.makeText(context,"File does not exist",Toast.LENGTH_LONG).show()
+
             }
             return fileMedia
 
@@ -248,7 +244,6 @@ class C2paUtils {
             location?.let {
                 exifLat = GPSTracker.getLatitudeAsDMS(location, 3)
                 exifLong = GPSTracker.getLongitudeAsDMS(location, 3)
-                Toast.makeText(mContext,"Location: $exifLat, $exifLong",Toast.LENGTH_LONG).show()
             }
 
             val exifData = ExifData(exifGpsVersion, exifLat, exifLong,
@@ -259,10 +254,8 @@ class C2paUtils {
                 null, null)
             contentCreds?.addExifAssertion(exifData)
             Timber.d("Exif:$exifData")
-            val fileData: FileData? = contentCreds?.embedManifest(fileIn.absolutePath)
-            if (fileData != null){
-                Toast.makeText(mContext,"File data: exists",Toast.LENGTH_LONG).show()
-            }
+            contentCreds?.embedManifest(fileIn.absolutePath)
+
         }
 
 
